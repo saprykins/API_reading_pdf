@@ -4,6 +4,16 @@ from flask import request
 from werkzeug.utils import secure_filename
 
 
+# requirements related to controller are to accomplish:
+# 1/ must return file_id, not filename
+# 2/ to test in virtual environment
+
+# possible improuvements:
+# 1/ check file extention before upload
+# 2/ delete "debug=True" in main function
+# 3/ locally saved file-names must be dynamic
+
+
 
 # CONTROLLER
 
@@ -36,10 +46,12 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
+
 # MODEL
 
 # extracting metadata from pdf-file
 # extracting text from pdf-file
+
 
 
 # VIEW
