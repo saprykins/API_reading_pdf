@@ -17,6 +17,9 @@ from werkzeug.utils import secure_filename
 # 2/ delete "debug=True" in main function
 # 3/ locally saved file-names must be dynamic
 
+# need to add processing state
+
+
 
 
 # CONTROLLER
@@ -39,7 +42,7 @@ def upload_file():
     and returns file's name
     
     An example of curl command to upload a file from command line:
-    curl -F file=@"f.txt" http://localhost:5000/documents
+    curl -sF file=@"f.txt" http://localhost:5000/documents
     """
     local_file_path = '../DOWNLOADS/uploaded_file-3.txt'
     file = request.files['file']
@@ -51,11 +54,25 @@ def upload_file():
 
 # VIEW
 
-# describes document processing state, metadata and shares a link to its content
-# @app.route("/documents/<id>")
+# routing to the endpoint that describes document's processing state
+# shares metadata and links to file's content
+
+@app.route("/documents/<id>", methods=['GET', 'POST'])
+def processing_meta_link(id):
+    """
+    It shares the link to the file
+    """
+    # file_path = '../DOWNLOADS/'
+    # id = 'uploaded_file-3'
+    file_id = id
+    message = 'to display the text from pdf type copy the link below'
+    file_path_link = 'http://localhost:5000/text/' + file_id + '.txt'
+    return file_path_link
 
 
-# displays the extracted text
+# routing to the endpoint that prints out the text from text-file
+# the followting commmand can be used to check the display
+# curl -s http://localhost:5000/text/uploaded_file-3.txt
 @app.route('/text/<id>.txt', methods=['GET', 'POST'])
 def print_text(id):
     file_path = '../DOWNLOADS/'
@@ -64,9 +81,8 @@ def print_text(id):
     file_path = file_path + file_name + '.txt'
     
     with open(file_path) as feed:
-        for line in feed:
-            # returns only the first line
-            return str(line.strip())
+        data = feed.read()
+        return str(data)
 
 
 
@@ -79,8 +95,3 @@ def print_text(id):
 if __name__ == '__main__':
     app.run(debug=True)
     # app.run()
-
-
-
-
-
