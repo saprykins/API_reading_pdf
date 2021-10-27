@@ -35,22 +35,30 @@ import pprint
 # metadata from pdf-files is flatten to be saved to text files
 # the issue should changed when using database
 
-# view is to urgently update because doesn't work with pdf-files
-# must develop paths and file names
+# must avoid saving temporary pdf-file instead of just saving text and metadata
+# global atributes to be handed over via functions
 
 
 
 # MODEL
 # working with database
 
+# global attributes 
+path_to_save_folder = '../PROJECT/'
+id = 'xyz'
+
+
 
 # below is temporary solution 
 # it is used to check pdf data and text exctraction to local text files
 def save_metadata_and_text_from_pdf_to_text_files():
-    with open('../PROJECT/checking_text.txt', 'w', encoding='utf-8') as f:
+    path_to_text_result = path_to_save_folder + id + '_text.txt'
+    path_to_meta_result = path_to_save_folder + id + '_meta.txt'
+
+    with open(path_to_text_result, 'w', encoding='utf-8') as f:
         f.write(extract_text_from_pdf())
 
-    with open('../PROJECT/checking_meta.txt', 'w', encoding='utf-8') as f:
+    with open(path_to_meta_result, 'w', encoding='utf-8') as f:
         for items in extract_metadata_from_pdf():
             f.write(items)
 
@@ -78,9 +86,9 @@ def upload_file():
     and returns file's name
     
     An example of curl command to upload a file from command line:
-    curl -sF file=@"f.txt" http://localhost:5000/documents
+    curl -sF file=@"1.pdf" http://localhost:5000/documents
     '''
-    local_file_path = '../PROJECT/uploaded_file.pdf'
+    local_file_path = path_to_save_folder + id + '.pdf'
     file = request.files['file']
     file.save(local_file_path)
     filename = secure_filename(file.filename)
@@ -88,21 +96,22 @@ def upload_file():
     # this is the change
     save_metadata_and_text_from_pdf_to_text_files()
     
-    return filename
+    return id
 
 
 
-# temporary pdf-file for development and testing purposes only
-path_to_sample_pdf = '../PROJECT/uploaded_file.pdf'
+
 
 # extracting text from pdf-file
 def extract_text_from_pdf():
+    path_to_sample_pdf = path_to_save_folder + id + '.pdf'
     text = extract_text(path_to_sample_pdf)
     return text
 
 
 # extracting metadata from pdf-file
 def extract_metadata_from_pdf():
+    path_to_sample_pdf = path_to_save_folder + id + '.pdf'
     with open(path_to_sample_pdf, 'rb') as file:
         parser = PDFParser(file)
         doc = PDFDocument(parser)
@@ -126,14 +135,13 @@ def extract_metadata_from_pdf():
 
 # routing to the endpoint that describes document's processing state
 # shares metadata and links to file's content
-
+# curl -s http://localhost:5000/documents/xyz
 @app.route("/documents/<id>", methods=['GET', 'POST'])
 def processing_meta_link(id):
     """
-    It shares the link to the file
+    It displays the link to the file
     """
-    # file_path = '../DOWNLOADS/'
-    # id = 'uploaded_file-3'
+    
     file_id = id
     message = 'to display the text from pdf type copy the link below'
     file_path_link = 'http://localhost:5000/text/' + file_id + '_meta.txt'
@@ -142,14 +150,11 @@ def processing_meta_link(id):
 
 # routing to the endpoint that prints out the text from text-file
 # the followting commmand can be used to check the display
-# curl -s http://localhost:5000/text/uploaded_file-3.txt
+# curl -s http://localhost:5000/text/xyz.txt
 @app.route('/text/<id>.txt', methods=['GET', 'POST'])
 def print_text(id):
-    file_path = '../PROJECT/'
-    # id = 'uploaded_file-3'
     file_name = id
-    # file_path = file_path + file_name + '_text.txt'
-    file_path = file_path + 'checking' + '_text.txt'
+    file_path = path_to_save_folder + id + '_text.txt'
     
     with open(file_path) as feed:
         data = feed.read()
