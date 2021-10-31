@@ -20,6 +20,9 @@ import pprint
 
 # requirements related to controller are to accomplish:
 # 1/ must return file_id, not filename
+# -- I use file name as id
+# -- Point to improuve: if file name is the same as existing, share a msg
+# -- several points are not allowed in file-names (only pdf are allowed)
 # 2/ to test in virtual environment
 
 # requirements related to view are to accomplish:
@@ -51,7 +54,7 @@ id = 'xyz'
 
 # below is temporary solution 
 # it is used to check pdf data and text exctraction to local text files
-def save_metadata_and_text_from_pdf_to_text_files():
+def save_metadata_and_text_from_pdf_to_text_files(id):
     path_to_text_result = path_to_save_folder + id + '_text.txt'
     path_to_meta_result = path_to_save_folder + id + '_meta.txt'
 
@@ -88,15 +91,21 @@ def upload_file():
     An example of curl command to upload a file from command line:
     curl -sF file=@"1.pdf" http://localhost:5000/documents
     '''
+
     local_file_path = path_to_save_folder + id + '.pdf'
     file = request.files['file']
     file.save(local_file_path)
     filename = secure_filename(file.filename)
 
-    # this is the change
-    save_metadata_and_text_from_pdf_to_text_files()
+    # id is for stored pdf-file
+    # new_id is to save text and metadata
+    # new_id consists of filename without file extension
+    # which is last 4 characters
+    new_id = filename[:-4:]
+    save_metadata_and_text_from_pdf_to_text_files(new_id)
     
-    return id
+
+    return filename[:-4:]
 
 
 
@@ -144,8 +153,20 @@ def processing_meta_link(id):
     
     file_id = id
     message = 'to display the text from pdf type copy the link below'
-    file_path_link = 'http://localhost:5000/text/' + file_id + '_meta.txt'
-    return file_path_link
+    file_path_link = 'http://localhost:5000/text/' + file_id + '_text.txt'
+    meta_link = 'http://localhost:5000/text/' + file_id + '_meta.txt'
+    # return file_path_link
+
+    # below i try to put several things in return statement
+    # it should be replaced working with MVC-model
+    status = 'document is successfully saved'
+    msg_meta = 'below is the link to meta data'
+    msg_text = 'below is the link to text'
+    new_line = '\n'
+    status_metadata_link = (
+        status + new_line + msg_meta + new_line + meta_link + new_line +
+        msg_text + new_line + file_path_link)
+    return status_metadata_link
 
 
 # routing to the endpoint that prints out the text from text-file
