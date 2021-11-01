@@ -30,16 +30,17 @@ import pprint
 # 2/ must find the file by id, not its name
 
 # possible improuvements:
-# 1/ check file extention before upload
+# 1/ check file extention before upload (pdf only)
 # 2/ delete "debug=True" in main function
 # 3/ locally saved file-names must be dynamic
 
-# need to add processing state
+# need to add processing state (to be able to share status)
 # metadata from pdf-files is flatten to be saved to text files
 # the issue should changed when using database
 
 # must avoid saving temporary pdf-file instead of just saving text and metadata
 # global atributes to be handed over via functions
+# for docs, you can include advice to use gitk ou git log --graph to show commits
 
 
 
