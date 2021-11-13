@@ -24,36 +24,18 @@ import json
 
 # STEPS OF IMPROUVEMENT
 
-# requirements related to controller are to accomplish:
-# 1/ must return file_id, not filename
-# -- Point to improuve: if file name is the same as existing, get a msg
-# -- several points are not allowed in file-names (only pdf are allowed)
-# 2/ to test in virtual environment
-
-# requirements related to view are to accomplish:
-# 1/ prints out all the text, not only the first line
-# 2/ must find the file by id, not its name
-
-# possible improuvements:
-# 1/ check file extention before upload (pdf only)
-# 2/ delete "debug=True" in main function
-
+# Point to improuve: if file name is the same as existing, get a msg
+# to test in virtual environment
+# check file extention before upload (pdf only)
+# delete "debug=True" in main function
 # need to add processing state (to be able to share status)
-# metadata from pdf-files is flatten to be saved to text files
-# the issue should changed when using database
-
-# global atributes to be handed over via functions
 # for docs, you can include advice to use gitk ou git log --graph to show commits
 
 
 # MODEL
-# working with database
 
 # global attributes
 path_to_save_folder = '../PROJECT/'
-
-# temporary pdf-file is saved in case issues during text extraction
-# temporary_pdf_file_name = 'temporary_file'
 
 
 def generate_file_id():
@@ -61,8 +43,7 @@ def generate_file_id():
     return str(file_id)
 
 
-# below is temporary solution
-# it is used to check pdf data and text exctraction to local text files
+# saves meta-data and text from pdf to local text files
 def save_metadata_and_text_from_pdf_to_text_files(doc_id):
     path_to_text_result = path_to_save_folder + doc_id + '_text.txt'
     path_to_meta_result = path_to_save_folder + doc_id + '_meta.txt'
@@ -71,8 +52,7 @@ def save_metadata_and_text_from_pdf_to_text_files(doc_id):
         f.write(extract_text_from_pdf(doc_id))
 
     with open(path_to_meta_result, 'w', encoding='utf-8') as f:
-        for items in extract_metadata_from_pdf(doc_id):
-            f.write(items)
+        f.write(json.dumps(extract_metadata_from_pdf(doc_id)))
 
 
 # CONTROLLER
@@ -96,20 +76,7 @@ def convert_doc_id_into_json(doc_id):
     return doc_id_in_json
 
 
-"""
-def convert_doc_text_into_json(doc_id):
-    
-    # doc_id in Python dictionary
-    doc_text_in_dictionary = {"text": doc_id, }
-
-    # convert into JSON:
-    doc_text_in_json = json.dumps(doc_text_in_dictionary)
-    return doc_text_in_json
-"""
-
 # routing to the endpoint that allows file upload
-
-
 @app.route('/documents', methods=['POST'])
 def upload_file():
     '''
@@ -117,7 +84,7 @@ def upload_file():
     and returns file's name
 
     An example of curl command to upload a file from command line:
-    curl -sF file=@"1.pdf" http://localhost:5000/documents
+    curl -sF file=@"sample_file_to_upload.pdf" http://localhost:5000/documents
     '''
 
     file_id = generate_file_id()
@@ -125,8 +92,6 @@ def upload_file():
     local_file_path = path_to_save_folder + file_id + '.pdf'
     file = request.files['file']
     file.save(local_file_path)
-    # filename = secure_filename(file.filename)
-
     save_metadata_and_text_from_pdf_to_text_files(file_id)
     return convert_doc_id_into_json(file_id)
 
@@ -163,7 +128,7 @@ def extract_metadata_from_pdf(doc_id):
 
 # routing to the endpoint that describes document's processing state
 # shares metadata and links to file's content
-# curl -s http://localhost:5000/documents/xyz
+# curl -s http://localhost:5000/documents/document_ic
 @app.route("/documents/<id>", methods=['GET', 'POST'])
 def processing_meta_link(id):
     """
@@ -172,16 +137,14 @@ def processing_meta_link(id):
 
     file_id = id
 
-    # get dictionary of meta-data
+    # get dictionary that holds meta-data
     meta_data_dictionary = extract_metadata_from_pdf(file_id)
 
-
-#     message = 'to display the text from pdf type copy the link below'
     file_path_link = 'http://localhost:5000/text/' + file_id + '_text.txt'
     meta_link = 'http://localhost:5000/text/' + file_id + '_meta.txt'
     # return file_path_link
 
-    # adding more elements to dictionary
+    # adds to dictionary status, links to file with text and meta-data
     meta_data_dictionary['status'] = 'succes'
     meta_data_dictionary['link_to_meta_data_file'] = meta_link
     meta_data_dictionary['link_to_file_with_text'] = file_path_link
@@ -193,7 +156,7 @@ def processing_meta_link(id):
 
 # routing to the endpoint that prints out the text from text-file
 # the followting commmand can be used to check the display
-# curl -s http://localhost:5000/text/xyz.txt
+# curl -s http://localhost:5000/text/document_id.txt
 @app.route('/text/<id>.txt', methods=['GET', 'POST'])
 def print_text(id):
     file_name = id
