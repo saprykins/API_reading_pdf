@@ -2,7 +2,7 @@
 from flask import Flask
 from flask import render_template
 from flask import request
-from werkzeug.utils import secure_filename
+# from werkzeug.utils import secure_filename
 
 
 # reading from pdf
@@ -14,14 +14,16 @@ from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
 import pprint
 
+# file-id generator
+import random
+import string
 
 
 # STEPS OF IMPROUVEMENT
 
 # requirements related to controller are to accomplish:
 # 1/ must return file_id, not filename
-# -- I use file name as id
-# -- Point to improuve: if file name is the same as existing, share a msg
+# -- Point to improuve: if file name is the same as existing, get a msg
 # -- several points are not allowed in file-names (only pdf are allowed)
 # 2/ to test in virtual environment
 
@@ -32,28 +34,31 @@ import pprint
 # possible improuvements:
 # 1/ check file extention before upload (pdf only)
 # 2/ delete "debug=True" in main function
-# 3/ locally saved file-names must be dynamic
 
 # need to add processing state (to be able to share status)
 # metadata from pdf-files is flatten to be saved to text files
 # the issue should changed when using database
 
-# must avoid saving temporary pdf-file instead of just saving text and metadata
 # global atributes to be handed over via functions
 # for docs, you can include advice to use gitk ou git log --graph to show commits
-
 
 
 # MODEL
 # working with database
 
-# global attributes 
+# global attributes
 path_to_save_folder = '../PROJECT/'
-id = 'xyz'
+
+# temporary pdf-file is saved in case issues during text extraction
+temporary_pdf_file_name = 'temporary_file'
 
 
+def generate_file_id():
+    file_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
+    return str(file_id)
 
-# below is temporary solution 
+
+# below is temporary solution
 # it is used to check pdf data and text exctraction to local text files
 def save_metadata_and_text_from_pdf_to_text_files(id):
     path_to_text_result = path_to_save_folder + id + '_text.txt'
@@ -67,9 +72,7 @@ def save_metadata_and_text_from_pdf_to_text_files(id):
             f.write(items)
 
 
-            
 # CONTROLLER
-
 # initialization of WSGI application
 app = Flask(__name__)
 
@@ -80,7 +83,6 @@ def index():
     return str("Index page")
 
 
-
 # working version
 # routing to the endpoint that allows file upload
 @app.route('/documents', methods=['POST'])
@@ -88,47 +90,38 @@ def upload_file():
     '''
     It saves the file in "local_file_path" received in curl command 
     and returns file's name
-    
+
     An example of curl command to upload a file from command line:
     curl -sF file=@"1.pdf" http://localhost:5000/documents
     '''
 
-    local_file_path = path_to_save_folder + id + '.pdf'
+    local_file_path = path_to_save_folder + temporary_pdf_file_name + '.pdf'
     file = request.files['file']
     file.save(local_file_path)
-    filename = secure_filename(file.filename)
+    # filename = secure_filename(file.filename)
 
-    # id is for stored pdf-file
-    # new_id is to save text and metadata
-    # new_id consists of filename without file extension
-    # which is last 4 characters
-    new_id = filename[:-4:]
-    save_metadata_and_text_from_pdf_to_text_files(new_id)
-    
-
-    return filename[:-4:]
-
-
-
+    file_id = generate_file_id()
+    save_metadata_and_text_from_pdf_to_text_files(file_id)
+    return file_id
 
 
 # extracting text from pdf-file
 def extract_text_from_pdf():
-    path_to_sample_pdf = path_to_save_folder + id + '.pdf'
+    path_to_sample_pdf = path_to_save_folder + temporary_pdf_file_name + '.pdf'
     text = extract_text(path_to_sample_pdf)
     return text
 
 
 # extracting metadata from pdf-file
 def extract_metadata_from_pdf():
-    path_to_sample_pdf = path_to_save_folder + id + '.pdf'
+    path_to_sample_pdf = path_to_save_folder + temporary_pdf_file_name + '.pdf'
     with open(path_to_sample_pdf, 'rb') as file:
         parser = PDFParser(file)
         doc = PDFDocument(parser)
     # next there're 2 options:
     # 1/ work with a list of dictionaries (difficult to write in a text file) or
     # 2/ flatten (easy to write in file)
-    
+
     # so, below are 2 options (is kept to use when working with database):
     # 1/ return doc.info
     # 2/ option:
@@ -136,9 +129,6 @@ def extract_metadata_from_pdf():
     for items in doc.info:
         array.append(str(items))
     return array
-
-
-
 
 
 # VIEW
@@ -151,7 +141,7 @@ def processing_meta_link(id):
     """
     It displays the link to the file
     """
-    
+
     file_id = id
     message = 'to display the text from pdf type copy the link below'
     file_path_link = 'http://localhost:5000/text/' + file_id + '_text.txt'
@@ -177,18 +167,12 @@ def processing_meta_link(id):
 def print_text(id):
     file_name = id
     file_path = path_to_save_folder + id + '_text.txt'
-    
+
     with open(file_path) as feed:
         data = feed.read()
         return str(data)
 
 
-
-
-
-
-
 if __name__ == '__main__':
     app.run(debug=True)
     # app.run()
-
