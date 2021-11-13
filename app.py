@@ -18,6 +18,9 @@ import pprint
 import random
 import string
 
+# return json
+import json
+
 
 # STEPS OF IMPROUVEMENT
 
@@ -50,7 +53,7 @@ import string
 path_to_save_folder = '../PROJECT/'
 
 # temporary pdf-file is saved in case issues during text extraction
-temporary_pdf_file_name = 'temporary_file'
+# temporary_pdf_file_name = 'temporary_file'
 
 
 def generate_file_id():
@@ -60,15 +63,15 @@ def generate_file_id():
 
 # below is temporary solution
 # it is used to check pdf data and text exctraction to local text files
-def save_metadata_and_text_from_pdf_to_text_files(id):
-    path_to_text_result = path_to_save_folder + id + '_text.txt'
-    path_to_meta_result = path_to_save_folder + id + '_meta.txt'
+def save_metadata_and_text_from_pdf_to_text_files(doc_id):
+    path_to_text_result = path_to_save_folder + doc_id + '_text.txt'
+    path_to_meta_result = path_to_save_folder + doc_id + '_meta.txt'
 
     with open(path_to_text_result, 'w', encoding='utf-8') as f:
-        f.write(extract_text_from_pdf())
+        f.write(extract_text_from_pdf(doc_id))
 
     with open(path_to_meta_result, 'w', encoding='utf-8') as f:
-        for items in extract_metadata_from_pdf():
+        for items in extract_metadata_from_pdf(doc_id):
             f.write(items)
 
 
@@ -83,8 +86,30 @@ def index():
     return str("Index page")
 
 
-# working version
+def convert_doc_id_into_json(doc_id):
+
+    # doc_id in Python dictionary
+    doc_id_dictionary = {"id": doc_id, }
+
+    # convert into JSON:
+    doc_id_in_json = json.dumps(doc_id_dictionary)
+    return doc_id_in_json
+
+
+"""
+def convert_doc_text_into_json(doc_id):
+    
+    # doc_id in Python dictionary
+    doc_text_in_dictionary = {"text": doc_id, }
+
+    # convert into JSON:
+    doc_text_in_json = json.dumps(doc_text_in_dictionary)
+    return doc_text_in_json
+"""
+
 # routing to the endpoint that allows file upload
+
+
 @app.route('/documents', methods=['POST'])
 def upload_file():
     '''
@@ -95,40 +120,43 @@ def upload_file():
     curl -sF file=@"1.pdf" http://localhost:5000/documents
     '''
 
-    local_file_path = path_to_save_folder + temporary_pdf_file_name + '.pdf'
+    file_id = generate_file_id()
+
+    local_file_path = path_to_save_folder + file_id + '.pdf'
     file = request.files['file']
     file.save(local_file_path)
     # filename = secure_filename(file.filename)
 
-    file_id = generate_file_id()
     save_metadata_and_text_from_pdf_to_text_files(file_id)
-    return file_id
+    return convert_doc_id_into_json(file_id)
 
 
 # extracting text from pdf-file
-def extract_text_from_pdf():
-    path_to_sample_pdf = path_to_save_folder + temporary_pdf_file_name + '.pdf'
-    text = extract_text(path_to_sample_pdf)
+def extract_text_from_pdf(doc_id):
+    path_to_pdf = path_to_save_folder + doc_id + '.pdf'
+    text = extract_text(path_to_pdf)
     return text
 
 
 # extracting metadata from pdf-file
-def extract_metadata_from_pdf():
-    path_to_sample_pdf = path_to_save_folder + temporary_pdf_file_name + '.pdf'
-    with open(path_to_sample_pdf, 'rb') as file:
+# returns dictionary
+def extract_metadata_from_pdf(doc_id):
+    path_to_pdf = path_to_save_folder + doc_id + '.pdf'
+    with open(path_to_pdf, 'rb') as file:
         parser = PDFParser(file)
         doc = PDFDocument(parser)
-    # next there're 2 options:
-    # 1/ work with a list of dictionaries (difficult to write in a text file) or
-    # 2/ flatten (easy to write in file)
 
-    # so, below are 2 options (is kept to use when working with database):
-    # 1/ return doc.info
-    # 2/ option:
-    array = []
-    for items in doc.info:
-        array.append(str(items))
-    return array
+        # converting data to json format
+        meta_data = {}
+        for item in doc.info:
+            meta_data['author'] = item['Producer'].decode("utf-8", 'ignore')
+            meta_data['creation_date'] = item['CreationDate'].decode(
+                "utf-8", 'ignore')
+            meta_data['modification_date'] = item['ModDate'].decode(
+                "utf-8", 'ignore')
+            meta_data['creator'] = item['Creator'].decode("utf-8", 'ignore')
+            # meta_data['title'] = item['Title'].decode("utf-8", 'ignore')
+        return meta_data
 
 
 # VIEW
@@ -143,21 +171,24 @@ def processing_meta_link(id):
     """
 
     file_id = id
-    message = 'to display the text from pdf type copy the link below'
+
+    # get dictionary of meta-data
+    meta_data_dictionary = extract_metadata_from_pdf(file_id)
+
+
+#     message = 'to display the text from pdf type copy the link below'
     file_path_link = 'http://localhost:5000/text/' + file_id + '_text.txt'
     meta_link = 'http://localhost:5000/text/' + file_id + '_meta.txt'
     # return file_path_link
 
-    # below i try to put several things in return statement
-    # it should be replaced working with MVC-model
-    status = 'document is successfully saved'
-    msg_meta = 'below is the link to meta data'
-    msg_text = 'below is the link to text'
-    new_line = '\n'
-    status_metadata_link = (
-        status + new_line + msg_meta + new_line + meta_link + new_line +
-        msg_text + new_line + file_path_link)
-    return status_metadata_link
+    # adding more elements to dictionary
+    meta_data_dictionary['status'] = 'succes'
+    meta_data_dictionary['link_to_meta_data_file'] = meta_link
+    meta_data_dictionary['link_to_file_with_text'] = file_path_link
+
+    file_information_in_json = json.dumps(meta_data_dictionary)
+
+    return file_information_in_json
 
 
 # routing to the endpoint that prints out the text from text-file
@@ -169,8 +200,15 @@ def print_text(id):
     file_path = path_to_save_folder + id + '_text.txt'
 
     with open(file_path) as feed:
-        data = feed.read()
-        return str(data)
+        text = feed.read()
+
+        # doc_id in Python dictionary
+        doc_text_in_dictionary = {"text": text, }
+
+        # convert into JSON:
+        doc_text_in_json = json.dumps(doc_text_in_dictionary)
+
+        return doc_text_in_json
 
 
 if __name__ == '__main__':
