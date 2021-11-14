@@ -33,7 +33,7 @@ import json
 
 
 # global attributes
-path_to_save_folder = './uploads/'
+path_to_save_folder = '../uploads/'
 
 
 def save_received_pdf(file_id):
