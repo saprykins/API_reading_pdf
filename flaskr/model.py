@@ -67,16 +67,6 @@ class Pdf(Base):
         return "<Pdf(author='%s', creation_date='%s', modification_date='%s', creator='%s', status='%s', text='%s', file_id='%s')>" % (
             self.author, self.creation_date, self.modification_date, self.creator, self.status, self.text, self.file_id)
 
-    '''
-    id = Column(Integer, primary_key=True)
-    author = Column(String)
-    creation_date = Column(String)
-
-    def __repr__(self):
-        return "<Pdf(author='%s', creation_date='%s')>" % (
-            self.author, self.creation_date)
-    '''
-
 
 def save_received_pdf(file_id):
     # save pdf-file
@@ -95,6 +85,8 @@ def get_doc_text_in_dictionary(file_id):
     return doc_text_in_dictionary
 """
 
+# we probably don't need this function
+
 
 def get_doc_text_in_dictionary(file_id):
     file_path = path_to_save_folder + file_id + '_text.txt'
@@ -112,21 +104,10 @@ def generate_file_id():
     file_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
     return str(file_id)
 
+
 # saves meta-data and text from pdf to database
-
-
 def save_metadata_and_text_to_data_base(doc_id):
-    # doc_text = extract_text_from_pdf(doc_id)
-    """
-    meta_data = extract_metadata_from_pdf(doc_id)
-    session.add_all([
-    Pdf(author=meta_data['author'], creation_date=meta_data['creation_date'],
-        modification_date=meta_data['modification_date'], creator=meta_data['creator'], status='ok', file_id=doc_id), 
-    # Pdf(author=meta_data['author'], creation_date=meta_data['creation_date'],
-        # modification_date=meta_data['modification_date'], creator=meta_data['creator'], status='ok', file_id=doc_id)
-        ])
-        # modification_date=meta_data['modification_date'], creator=meta_data['creator'], status='ok', text=doc_text, file_id=doc_id)
-    """
+    doc_text = extract_text_from_pdf(doc_id)
     meta_data = extract_metadata_from_pdf(doc_id)
 
     session.add_all([
@@ -135,10 +116,15 @@ def save_metadata_and_text_to_data_base(doc_id):
             modification_date=meta_data['modification_date'],
             creator=meta_data['creator'],
             status='ok',
-            text='bla-bla',
+            text=doc_text,
             file_id=doc_id)
     ])
+
+    # Exception raised when we send files one after another
     session.commit()
+    pdf_item = session.query(Pdf).filter_by(file_id=doc_id).first()
+
+    return pdf_item.id
 
 # extracting text from pdf-file
 
@@ -160,16 +146,7 @@ def extract_metadata_from_pdf(doc_id):
 
         # converting data to json format
         meta_data = {}
-        """
-        for item in doc.info:
-            meta_data['author'] = item['Producer'].decode("utf-8", 'ignore')
-            meta_data['creation_date'] = item['CreationDate'].decode(
-                "utf-8", 'ignore')
-            meta_data['modification_date'] = item['ModDate'].decode(
-                "utf-8", 'ignore')
-            meta_data['creator'] = item['Creator'].decode("utf-8", 'ignore')
-            # meta_data['title'] = item['Title'].decode("utf-8", 'ignore')
-        """
+
         for item in doc.info:
             meta_data['author'] = item['Producer'].decode("utf-8", 'ignore')
             meta_data['creation_date'] = item['CreationDate'].decode(

@@ -45,10 +45,11 @@ def upload_file():
     init_db()
     # file_id = r'C:\_My_Files\_FA\_ETUDES\Python\py-code\flask_reading_pdf_try_to_put_views_aside\uploads\carhovchadjijffq.pdf'
     # file_id = 'carhovchadjijffq'
-    save_metadata_and_text_to_data_base(file_id)
+
+    record_id = save_metadata_and_text_to_data_base(file_id)
 
     # doc_id in Python dictionary
-    doc_id_dictionary = {"id": file_id, }
+    doc_id_dictionary = {"id": record_id}
 
     # convert into JSON:
     doc_id_in_json = json.dumps(doc_id_dictionary)
@@ -66,9 +67,11 @@ def processing_meta_link(id):
     '''
 
     # file_id = id
-    file_id = 1
+
+    # search by record_id in database works, but only once
+    record_id = id
     '''
-    # get dictionary that holds meta-data
+    # get dictionary that contains meta-data
     meta_data_dictionary = extract_metadata_from_pdf(file_id)
     # our_pdf = session.query(Pdf).filter_by(id=file_id).first()
     
@@ -83,7 +86,7 @@ def processing_meta_link(id):
     # meta_data_dictionary['link_to_meta_data_file'] = meta_link
     # meta_data_dictionary['link_to_file_with_text'] = file_path_link
     '''
-    pdf_item = session.query(Pdf).filter_by(id=file_id).first()
+    pdf_item = session.query(Pdf).filter_by(id=record_id).first()
 
     meta_data_dictionary = {}
     meta_data_dictionary['author'] = pdf_item.author
@@ -92,8 +95,10 @@ def processing_meta_link(id):
 
     meta_data_dictionary['creator'] = pdf_item.creator
     meta_data_dictionary['status'] = pdf_item.status
-    meta_data_dictionary['text'] = pdf_item.text
+    # meta_data_dictionary['text'] = pdf_item.text
     meta_data_dictionary['file_id'] = pdf_item.file_id
+    meta_data_dictionary['link_to_content'] = 'http://localhost:5000/text/' + \
+        str(pdf_item.id) + '.txt'
 
     file_information_in_json = json.dumps(meta_data_dictionary)
 
@@ -106,11 +111,12 @@ def processing_meta_link(id):
 
 @get_text_blueprint.route('/text/<id>.txt', methods=['GET', 'POST'])
 def print_text(id):
-    # file_id = id
-    file_id = 1
+    file_id = id
 
     # convert into JSON:
-    # doc_text_in_json = json.dumps(get_doc_text_in_dictionary(file_id))
+
     pdf_item = session.query(Pdf).filter_by(id=file_id).first()
     doc_text_in_json = pdf_item.text
+    doc_text_in_json = json.dumps(get_doc_text_in_dictionary(file_id))
+
     return doc_text_in_json
