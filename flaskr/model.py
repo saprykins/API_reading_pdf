@@ -1,4 +1,5 @@
 # working with web
+
 from flask import render_template
 from flask import request
 # from werkzeug.utils import secure_filename
@@ -19,16 +20,6 @@ import string
 
 # return json
 import json
-
-
-# working with databse
-# from views import Base
-from sqlalchemy import Column, Integer, String
-# from database import session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-# from model import init_db
 
 
 # STEPS OF IMPROUVEMENT
@@ -91,17 +82,6 @@ def save_received_pdf(file_id):
     file.save(local_file_path)
 
 
-"""
-# don't forget to change return type to dictionary
-# must use pdf as input
-def get_doc_text_in_dictionary(file_id):
-    text = extract_text_from_pdf(file_id)
-    doc_text_in_dictionary = {"text": text, }
-
-    return doc_text_in_dictionary
-"""
-
-
 def get_doc_text_in_dictionary(file_id):
     file_path = path_to_save_folder + file_id + '_text.txt'
 
@@ -126,7 +106,7 @@ def save_metadata_and_text_to_data_base(doc_id):
     meta_data = extract_metadata_from_pdf(doc_id)
     session.add_all([
     Pdf(author=meta_data['author'], creation_date=meta_data['creation_date'],
-        modification_date=meta_data['modification_date'], creator=meta_data['creator'], status='ok', file_id=doc_id), 
+        modification_date=meta_data['modification_date'], creator=meta_data['creator'], status='ok', file_id=doc_id),
     # Pdf(author=meta_data['author'], creation_date=meta_data['creation_date'],
         # modification_date=meta_data['modification_date'], creator=meta_data['creator'], status='ok', file_id=doc_id)
         ])
@@ -163,7 +143,6 @@ def extract_metadata_from_pdf(doc_id):
 
         # converting data to json format
         meta_data = {}
-        """
         for item in doc.info:
             meta_data['author'] = item['Producer'].decode("utf-8", 'ignore')
             meta_data['creation_date'] = item['CreationDate'].decode(
