@@ -1,13 +1,10 @@
 # working with web
-
 from flask import render_template
 from flask import request
 # from werkzeug.utils import secure_filename
 
-
 # reading from pdf
 from pdfminer.high_level import extract_text
-
 
 # extracting data from pdf
 from pdfminer.pdfparser import PDFParser
@@ -21,6 +18,14 @@ import string
 # return json
 import json
 
+# working with databse
+# from views import Base
+from sqlalchemy import Column, Integer, String
+# from database import session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+# from model import init_db
 
 # STEPS OF IMPROUVEMENT
 
@@ -31,10 +36,8 @@ import json
 # need to add processing state (to be able to share status)
 # for docs, you can include advice to use gitk ou git log --graph to show commits
 
-
 # global attributes
 path_to_save_folder = '../uploads/'
-
 
 engine = create_engine('sqlite:///pdf.db', echo=False)
 connection = engine.connect()
@@ -82,6 +85,17 @@ def save_received_pdf(file_id):
     file.save(local_file_path)
 
 
+"""
+# don't forget to change return type to dictionary
+# must use pdf as input
+def get_doc_text_in_dictionary(file_id):
+    text = extract_text_from_pdf(file_id)
+    doc_text_in_dictionary = {"text": text, }
+
+    return doc_text_in_dictionary
+"""
+
+
 def get_doc_text_in_dictionary(file_id):
     file_path = path_to_save_folder + file_id + '_text.txt'
 
@@ -98,15 +112,16 @@ def generate_file_id():
     file_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
     return str(file_id)
 
-
 # saves meta-data and text from pdf to database
+
+
 def save_metadata_and_text_to_data_base(doc_id):
     # doc_text = extract_text_from_pdf(doc_id)
     """
     meta_data = extract_metadata_from_pdf(doc_id)
     session.add_all([
     Pdf(author=meta_data['author'], creation_date=meta_data['creation_date'],
-        modification_date=meta_data['modification_date'], creator=meta_data['creator'], status='ok', file_id=doc_id),
+        modification_date=meta_data['modification_date'], creator=meta_data['creator'], status='ok', file_id=doc_id), 
     # Pdf(author=meta_data['author'], creation_date=meta_data['creation_date'],
         # modification_date=meta_data['modification_date'], creator=meta_data['creator'], status='ok', file_id=doc_id)
         ])
@@ -125,16 +140,18 @@ def save_metadata_and_text_to_data_base(doc_id):
     ])
     session.commit()
 
-
 # extracting text from pdf-file
+
+
 def extract_text_from_pdf(doc_id):
     path_to_pdf = path_to_save_folder + doc_id + '.pdf'
     text = extract_text(path_to_pdf)
     return text
 
-
 # extracting metadata from pdf-file
 # returns dictionary
+
+
 def extract_metadata_from_pdf(doc_id):
     path_to_pdf = path_to_save_folder + doc_id + '.pdf'
     with open(path_to_pdf, 'rb') as file:
@@ -143,6 +160,7 @@ def extract_metadata_from_pdf(doc_id):
 
         # converting data to json format
         meta_data = {}
+        """
         for item in doc.info:
             meta_data['author'] = item['Producer'].decode("utf-8", 'ignore')
             meta_data['creation_date'] = item['CreationDate'].decode(
@@ -162,7 +180,6 @@ def extract_metadata_from_pdf(doc_id):
             # meta_data['title'] = item['Title'].decode("utf-8", 'ignore')
 
     return meta_data
-
 
 # save_metadata_and_text_to_data_base(doc_id)
 # print(processing_meta_link(doc_id))
