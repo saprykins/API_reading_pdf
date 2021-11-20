@@ -59,25 +59,20 @@ def init_db():
 
 class Pdf(Base):
     __tablename__ = 'pdfs'
-    '''
+
     id = Column(Integer, primary_key=True)
     author = Column(String)
     creation_date = Column(String)
     modification_date = Column(String)
     creator = Column(String)
     status = Column(String)
-    # text = Column(String)
+    text = Column(String)
     file_id = Column(String)
 
     def __repr__(self):
-
-        """
         return "<Pdf(author='%s', creation_date='%s', modification_date='%s', creator='%s', status='%s', text='%s', file_id='%s')>" % (
             self.author, self.creation_date, self.modification_date, self.creator, self.status, self.text, self.file_id)
-        """
 
-        return "<Pdf(author='%s', creation_date='%s', modification_date='%s', creator='%s', status='%s', file_id='%s')>" % (
-            self.author, self.creation_date, self.modification_date, self.creator, self.status, self.file_id)
     '''
     id = Column(Integer, primary_key=True)
     author = Column(String)
@@ -86,6 +81,7 @@ class Pdf(Base):
     def __repr__(self):
         return "<Pdf(author='%s', creation_date='%s')>" % (
             self.author, self.creation_date)
+    '''
 
 
 def save_received_pdf(file_id):
@@ -140,7 +136,12 @@ def save_metadata_and_text_to_data_base(doc_id):
 
     session.add_all([
         Pdf(author=meta_data['author'],
-            creation_date=meta_data['creation_date'])
+            creation_date=meta_data['creation_date'],
+            modification_date=meta_data['modification_date'],
+            creator=meta_data['creator'],
+            status='ok',
+            text='bla-bla',
+            file_id=doc_id)
     ])
     session.commit()
 
@@ -176,6 +177,10 @@ def extract_metadata_from_pdf(doc_id):
             meta_data['author'] = item['Producer'].decode("utf-8", 'ignore')
             meta_data['creation_date'] = item['CreationDate'].decode(
                 "utf-8", 'ignore')
+            meta_data['modification_date'] = item['ModDate'].decode(
+                "utf-8", 'ignore')
+            meta_data['creator'] = item['Creator'].decode("utf-8", 'ignore')
+            # meta_data['title'] = item['Title'].decode("utf-8", 'ignore')
 
     return meta_data
 

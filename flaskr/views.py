@@ -87,7 +87,13 @@ def processing_meta_link(id):
     meta_data_dictionary = {}
     meta_data_dictionary['author'] = pdf_item.author
     meta_data_dictionary['creation_date'] = pdf_item.creation_date
-    meta_data_dictionary['status'] = 'succes'
+    meta_data_dictionary['modification_date'] = pdf_item.modification_date
+
+    meta_data_dictionary['creator'] = pdf_item.creator
+    meta_data_dictionary['status'] = pdf_item.status
+    meta_data_dictionary['text'] = pdf_item.text
+    meta_data_dictionary['file_id'] = pdf_item.file_id
+
     file_information_in_json = json.dumps(meta_data_dictionary)
 
     return file_information_in_json
@@ -102,5 +108,7 @@ def print_text(id):
     file_id = 1
 
     # convert into JSON:
-    doc_text_in_json = json.dumps(get_doc_text_in_dictionary(file_id))
+    # doc_text_in_json = json.dumps(get_doc_text_in_dictionary(file_id))
+    pdf_item = session.query(Pdf).filter_by(id=file_id).first()
+    doc_text_in_json = pdf_item.text
     return doc_text_in_json
