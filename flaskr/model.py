@@ -1,7 +1,5 @@
 # working with web
-from flask import render_template
 from flask import request
-# from werkzeug.utils import secure_filename
 
 # reading from pdf
 from pdfminer.high_level import extract_text
@@ -9,32 +7,33 @@ from pdfminer.high_level import extract_text
 # extracting data from pdf
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
-import pprint
 
 # file-id generator
 import random
 import string
 
-# return json
-import json
-
 # working with databse
-# from views import Base
 from sqlalchemy import Column, Integer, String
-# from database import session
 from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-# from model import init_db
+
 
 # STEPS OF IMPROUVEMENT
-
+# Try to use pprint
 # Point to improuve: if file name is the same as existing, get a msg
-# to test in virtual environment
 # check file extention before upload (pdf only)
 # delete "debug=True" in main function
 # need to add processing state (to be able to share status)
 # for docs, you can include advice to use gitk ou git log --graph to show commits
+# generate upload-folder automatically if it doens't exist
+# work with exceptions
+# charge out views.py // probably need to move instructions to controller
+# tbc if my return is real json
+# try to apply jsonify
+# add raise exception capture when no db-file and you try to get data
+# tbc number of blueprints
+# tbc if can keep app in __init__.py outside function
 
 # global attributes
 path_to_save_folder = '../uploads/'
@@ -48,7 +47,6 @@ session = Session()
 
 
 def init_db():
-    # Base.metadata.create_all(bind=engine)
     Base.metadata.create_all(engine)
 
 
@@ -76,31 +74,6 @@ def save_received_pdf(file_id):
     file.save(local_file_path)
 
 
-"""
-# don't forget to change return type to dictionary
-# must use pdf as input
-def get_doc_text_in_dictionary(file_id):
-    text = extract_text_from_pdf(file_id)
-    doc_text_in_dictionary = {"text": text, }
-
-    return doc_text_in_dictionary
-"""
-
-# we probably don't need this function
-
-
-def get_doc_text_in_dictionary(file_id):
-    file_path = path_to_save_folder + file_id + '_text.txt'
-
-    with open(file_path) as feed:
-        text = feed.read()
-
-        # doc_id in Python dictionary
-        doc_text_in_dictionary = {"text": text, }
-
-        return doc_text_in_dictionary
-
-
 def generate_file_id():
     file_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
     return str(file_id)
@@ -121,7 +94,6 @@ def save_metadata_and_text_to_data_base(doc_id):
             file_id=doc_id)
     ])
 
-    # Exception raised when we send files one after another
     session.commit()
     pdf_item = session.query(Pdf).filter_by(file_id=doc_id).first()
 
@@ -158,6 +130,3 @@ def extract_metadata_from_pdf(doc_id):
             # meta_data['title'] = item['Title'].decode("utf-8", 'ignore')
 
     return meta_data
-
-# save_metadata_and_text_to_data_base(doc_id)
-# print(processing_meta_link(doc_id))

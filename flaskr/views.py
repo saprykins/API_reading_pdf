@@ -1,15 +1,9 @@
 import json
 from model import generate_file_id, save_metadata_and_text_to_data_base, save_received_pdf
-from model import extract_metadata_from_pdf, get_doc_text_in_dictionary
 from flask import Blueprint
 from model import Pdf
 
-# from database import Base
-from sqlalchemy import Column, Integer, String
 from model import session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from model import init_db
 
 index_blueprint = Blueprint('index', __name__)
@@ -39,13 +33,7 @@ def upload_file():
     file_id = generate_file_id()
 
     save_received_pdf(file_id)
-    # record_id_in_db = save_metadata_and_text_to_data_base(file_id)
-
-    # Base.query = session.query_property()
     init_db()
-    # file_id = r'C:\_My_Files\_FA\_ETUDES\Python\py-code\flask_reading_pdf_try_to_put_views_aside\uploads\carhovchadjijffq.pdf'
-    # file_id = 'carhovchadjijffq'
-
     record_id = save_metadata_and_text_to_data_base(file_id)
 
     # doc_id in Python dictionary
@@ -55,11 +43,10 @@ def upload_file():
     doc_id_in_json = json.dumps(doc_id_dictionary)
     return doc_id_in_json
 
+
 # routing to the endpoint that describes document's processing state
 # shares metadata and links to file's content
 # curl -s http://localhost:5000/documents/document_ic
-
-
 @get_file_info_blueprint.route("/documents/<id>", methods=['GET', 'POST'])
 def processing_meta_link(id):
     '''
@@ -70,22 +57,7 @@ def processing_meta_link(id):
 
     # search by record_id in database works, but only once
     record_id = id
-    '''
-    # get dictionary that contains meta-data
-    meta_data_dictionary = extract_metadata_from_pdf(file_id)
-    # our_pdf = session.query(Pdf).filter_by(id=file_id).first()
-    
-    # our_pdf.creation_date
 
-    # return file_path_link
-    # file_path_link = 'http://localhost:5000/text/' + file_id + '_text.txt'
-    # meta_link = 'http://localhost:5000/text/' + file_id + '_meta.txt'
-
-    # add to dictionary status, links to file with text and meta-data
-    meta_data_dictionary['status'] = 'succes'
-    # meta_data_dictionary['link_to_meta_data_file'] = meta_link
-    # meta_data_dictionary['link_to_file_with_text'] = file_path_link
-    '''
     pdf_item = session.query(Pdf).filter_by(id=record_id).first()
 
     meta_data_dictionary = {}
