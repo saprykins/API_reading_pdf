@@ -116,7 +116,7 @@ def print_text(id):
     # convert into JSON:
 
     pdf_item = session.query(Pdf).filter_by(id=file_id).first()
-    doc_text_in_json = pdf_item.text
-    doc_text_in_json = json.dumps(get_doc_text_in_dictionary(file_id))
+    doc_text_in_dict = {'text': pdf_item.text}
+    doc_text_in_json = json.dumps(doc_text_in_dict)
 
     return doc_text_in_json

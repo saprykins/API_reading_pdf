@@ -39,7 +39,8 @@ from sqlalchemy.ext.declarative import declarative_base
 # global attributes
 path_to_save_folder = '../uploads/'
 
-engine = create_engine('sqlite:///pdf.db', echo=False)
+engine = create_engine('sqlite:///pdf.db', echo=False,
+                       connect_args={'check_same_thread': False})
 connection = engine.connect()
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
