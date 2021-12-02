@@ -1,10 +1,16 @@
 import json
-from model import generate_file_id, save_metadata_and_text_to_data_base, save_received_pdf
 from flask import Blueprint
-from model import Pdf
 
+# to check uploaded file-name
+from flask import request
+from werkzeug.utils import secure_filename
+
+from model import generate_file_id, save_metadata_and_text_to_data_base, save_received_pdf
+from model import Pdf
 from model import session
 from model import init_db
+
+
 
 # blueprints used to split code into several files 
 index_blueprint = Blueprint('index', __name__)
@@ -27,18 +33,29 @@ def upload_file():
     Routing to the endpoint that allows file upload
     It saves the uploaded file on local machine and returns file's id
     '''
+    
+    # checks received file extention
+    file = request.files['file']
+    filename = secure_filename(file.filename)
+    file_extention = filename[-3::]
+    if file_extention == 'pdf': 
+        file_id = generate_file_id()
+        save_received_pdf(file_id)
+        init_db()
+        record_id = save_metadata_and_text_to_data_base(file_id)
 
-    file_id = generate_file_id()
-    save_received_pdf(file_id)
-    init_db()
-    record_id = save_metadata_and_text_to_data_base(file_id)
+        # put doc_id in Python dictionary
+        doc_id_dictionary = {"id": record_id}
 
-    # put doc_id in Python dictionary
-    doc_id_dictionary = {"id": record_id}
-
-    # convert dictionary into JSON format
-    doc_id_in_json = json.dumps(doc_id_dictionary)
-    return doc_id_in_json
+        # convert dictionary into JSON format
+        doc_id_in_json = json.dumps(doc_id_dictionary)
+        return doc_id_in_json
+    else:
+        error_msg = {
+            # "status":500,
+            "error_message":"the file-type you send is not pdf",
+            }
+        return error_msg
 
 
 
@@ -78,9 +95,6 @@ def print_text(id):
     """
     Routing to the endpoint that returns related text from database
     """
-    # file_id = id
-
-    # pdf_item = session.query(Pdf).filter_by(id=file_id).first()
     pdf_item = session.query(Pdf).filter_by(id=id).first()
     doc_text_in_dict = {'text': pdf_item.text}
     doc_text_in_json = json.dumps(doc_text_in_dict)

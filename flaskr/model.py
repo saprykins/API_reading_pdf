@@ -18,6 +18,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
+# for verification if upload path exist
+import os
+
 
 # STEPS OF IMPROUVEMENT
 # Try to use pprint
@@ -25,8 +28,6 @@ from sqlalchemy.ext.declarative import declarative_base
 # check file extention before upload (pdf only)
 # delete "debug=True" in main function
 # need to add processing state (to be able to share status)
-# for docs, you can include advice to use gitk ou git log --graph to show commits
-# generate upload-folder automatically if it doens't exist
 # work with exceptions
 # charge out views.py // probably need to move instructions to controller
 # tbc if my return is real json
@@ -70,11 +71,23 @@ class Pdf(Base):
             self.author, self.creation_date, self.modification_date, self.creator, self.status, self.text, self.file_id)
 
 
+
+def create_upload_folder_if_needed():
+    """
+    Upload folder is where pdf files are saved
+    If upload folder does not exist, it creates one
+    """
+    if not os.path.exists(path_to_save_folder): 
+        os.makedirs(path_to_save_folder)
+     
+
+    
 def save_received_pdf(file_id):
     """
     saves uploaded pdf-file to local path 
     uses file_id as a part of file name
     """
+    create_upload_folder_if_needed()
     local_file_path = path_to_save_folder + file_id + '.pdf'
     file = request.files['file']
     file.save(local_file_path)
@@ -123,7 +136,7 @@ def extract_text_from_pdf(doc_id):
 def extract_metadata_from_pdf(doc_id):
     """
     extracts metadata from pdf-file
-    and returns dictionary
+    and returns dictionary with metadata inside
     """
     path_to_pdf = path_to_save_folder + doc_id + '.pdf'
     with open(path_to_pdf, 'rb') as file:
