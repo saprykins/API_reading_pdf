@@ -1,18 +1,18 @@
-# working with web
+# imports to work with web
 from flask import request
 
-# reading from pdf
+# imports to read from pdf
 from pdfminer.high_level import extract_text
 
-# extracting data from pdf
+# imports to extract data from pdf
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
 
-# file-id generator
+# imports to generate file-id 
 import random
 import string
 
-# working with databse
+# imports to work with databse
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -35,9 +35,12 @@ from sqlalchemy.ext.declarative import declarative_base
 # tbc number of blueprints
 # tbc if can keep app in __init__.py outside function
 
-# global attributes
+
+# path to folder where files will be saved
 path_to_save_folder = '../uploads/'
 
+
+# creation and preparation of database
 engine = create_engine('sqlite:///pdf.db', echo=False,
                        connect_args={'check_same_thread': False})
 connection = engine.connect()
@@ -68,19 +71,27 @@ class Pdf(Base):
 
 
 def save_received_pdf(file_id):
-    # save pdf-file
+    """
+    saves uploaded pdf-file to local path 
+    uses file_id as a part of file name
+    """
     local_file_path = path_to_save_folder + file_id + '.pdf'
     file = request.files['file']
     file.save(local_file_path)
 
 
 def generate_file_id():
+    """ 
+    generates id that will be used to save file localy     
+    """
     file_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
     return str(file_id)
 
 
-# saves meta-data and text from pdf to database
 def save_metadata_and_text_to_data_base(doc_id):
+    """
+    saves meta-data and text from pdf to database
+    """
     doc_text = extract_text_from_pdf(doc_id)
     meta_data = extract_metadata_from_pdf(doc_id)
 
@@ -99,19 +110,21 @@ def save_metadata_and_text_to_data_base(doc_id):
 
     return pdf_item.id
 
-# extracting text from pdf-file
-
 
 def extract_text_from_pdf(doc_id):
+    """
+    extracts text from pdf-file
+    """
     path_to_pdf = path_to_save_folder + doc_id + '.pdf'
     text = extract_text(path_to_pdf)
     return text
 
-# extracting metadata from pdf-file
-# returns dictionary
-
 
 def extract_metadata_from_pdf(doc_id):
+    """
+    extracts metadata from pdf-file
+    and returns dictionary
+    """
     path_to_pdf = path_to_save_folder + doc_id + '.pdf'
     with open(path_to_pdf, 'rb') as file:
         parser = PDFParser(file)
