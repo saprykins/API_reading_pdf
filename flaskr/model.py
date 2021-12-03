@@ -25,13 +25,10 @@ import os
 # STEPS OF IMPROUVEMENT
 # Try to use pprint
 # Point to improuve: if file name is the same as existing, get a msg
-# check file extention before upload (pdf only)
 # delete "debug=True" in main function
 # need to add processing state (to be able to share status)
 # work with exceptions
 # charge out views.py // probably need to move instructions to controller
-# tbc if my return is real json
-# try to apply jsonify
 # add raise exception capture when no db-file and you try to get data
 # tbc number of blueprints
 # tbc if can keep app in __init__.py outside function

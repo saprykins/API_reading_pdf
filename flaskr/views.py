@@ -51,10 +51,9 @@ def upload_file():
 
     else:
         error_msg = {
-            # "status":500,
             "error_message":"you should send only pdf file",
             }
-        return error_msg
+        return jsonify(error_msg)
 
 
 
