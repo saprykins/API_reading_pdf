@@ -1,4 +1,5 @@
-import json
+# import json
+from flask import jsonify
 from flask import Blueprint
 
 # to check uploaded file-name
@@ -34,8 +35,8 @@ def upload_file():
     It saves the uploaded file on local machine and returns file's id
     '''
     
-    # checks received file extention
     file = request.files['file']
+
     filename = secure_filename(file.filename)
     file_extention = filename[-3::]
     if file_extention == 'pdf': 
@@ -46,20 +47,18 @@ def upload_file():
 
         # put doc_id in Python dictionary
         doc_id_dictionary = {"id": record_id}
+        return jsonify(doc_id_dictionary)
 
-        # convert dictionary into JSON format
-        doc_id_in_json = json.dumps(doc_id_dictionary)
-        return doc_id_in_json
     else:
         error_msg = {
             # "status":500,
-            "error_message":"the file-type you send is not pdf",
+            "error_message":"you should send only pdf file",
             }
         return error_msg
 
 
 
-@get_file_info_blueprint.route("/documents/<id>", methods=['GET', 'POST'])
+@get_file_info_blueprint.route("/documents/<id>", methods=['GET'])
 def processing_meta_link(id):
     '''
     Routing to the endpoint that returns document's metadata in json
@@ -69,8 +68,9 @@ def processing_meta_link(id):
     record_id = id
 
     # retrives information from database to dictionary format
+    
     pdf_item = session.query(Pdf).filter_by(id=record_id).first()
-
+        
     meta_data_dictionary = {}
     meta_data_dictionary['author'] = pdf_item.author
     meta_data_dictionary['creation_date'] = pdf_item.creation_date
@@ -83,20 +83,15 @@ def processing_meta_link(id):
     meta_data_dictionary['link_to_content'] = 'http://localhost:5000/text/' + \
         str(pdf_item.id) + '.txt'
 
-    file_information_in_json = json.dumps(meta_data_dictionary)
-
-    return file_information_in_json
+    return jsonify(meta_data_dictionary)
 
 
 
-
-@get_text_blueprint.route('/text/<id>.txt', methods=['GET', 'POST'])
+@get_text_blueprint.route('/text/<id>.txt', methods=['GET'])
 def print_text(id):
     """
     Routing to the endpoint that returns related text from database
     """
     pdf_item = session.query(Pdf).filter_by(id=id).first()
     doc_text_in_dict = {'text': pdf_item.text}
-    doc_text_in_json = json.dumps(doc_text_in_dict)
-
-    return doc_text_in_json
+    return jsonify(doc_text_in_dict)
