@@ -10,7 +10,7 @@ from model import generate_file_id, save_metadata_and_text_to_data_base, save_re
 from model import Pdf
 from model import session
 from model import init_db
-
+from model import id_in_database
 
 
 # blueprints used to split code into several files 
@@ -30,10 +30,14 @@ def index():
 
 @upload_file_blueprint.route('/documents', methods=['POST'])
 def upload_file():
+# def upload_file():
     '''
     Routing to the endpoint that allows file upload
     It saves the uploaded file on local machine and returns file's id
     '''
+    
+    # must add extra code to check if there's a file
+    file = request.files['file']
 
     """
     if request.method == "POST":
@@ -44,9 +48,7 @@ def upload_file():
                 "error_message":"no file chosen",
                 }
             return jsonify(error_msg)
-    """
-
-    file = request.files['file']
+    
 
     # verification if filename is empty
     if file.filename == "":
@@ -54,11 +56,16 @@ def upload_file():
             "error_message":"no file chosen",
             }
         return jsonify(error_msg)
+    """
 
-    # verification of file type
-    # only pdf- and PDF-files are allowed
+    # verification of file type from its name
     filename = secure_filename(file.filename)
+    
+    # only pdf- and PDF-files are allowed
     file_extention = filename[-3::].lower()
+
+    # if file is pdf-type
+    # it saves the file and returns its identifier from database in json-format
     if file_extention == 'pdf': 
         file_id = generate_file_id()
         save_received_pdf(file_id)
@@ -68,12 +75,14 @@ def upload_file():
         # put doc_id in Python dictionary
         doc_id_dictionary = {"id": record_id}
         return jsonify(doc_id_dictionary)
-
+    
+    # in case the file is not pdf
+    # it returns error in json and 415 HTML error code (Unsupported Media Type)
     else:
         error_msg = {
             "error_message":"only .pdf or .PDF-file types are allowed",
             }
-        return jsonify(error_msg)
+        return jsonify(error_msg), 415
 
 
 
@@ -84,15 +93,7 @@ def processing_meta_link(id):
     id is id in database
     '''
     
-    # checks the highest id in database
-    max_id_in_database = session.query(Pdf).count()
-    
-    # creates an array of existing indexes in database
-    list_of_id_in_database = list(range(1, max_id_in_database + 1))
-    
-    # checks if requested id is a number 
-    # and if the index is in database
-    if id.isdigit() and int(id) in list_of_id_in_database:    
+    if id_in_database(id):
         pdf_item = session.query(Pdf).filter_by(id=id).first()
         meta_data_dictionary = {}
         meta_data_dictionary['author'] = pdf_item.author
@@ -107,18 +108,29 @@ def processing_meta_link(id):
             str(pdf_item.id) + '.txt'
         return jsonify(meta_data_dictionary)
 
+    # in other case it returns error message in json and 404 HTML error code (Not Found)
     else: 
         error_msg = {
             "error_message":"the id you ask does not exist",
             }
-        return jsonify(error_msg)
+        return jsonify(error_msg), 404
     
-
+    
 @get_text_blueprint.route('/text/<id>.txt', methods=['GET'])
 def print_text(id):
     """
     Routing to the endpoint that returns related text from database
     """
-    pdf_item = session.query(Pdf).filter_by(id=id).first()
-    doc_text_in_dict = {'text': pdf_item.text}
-    return jsonify(doc_text_in_dict)
+    # checks if requested id in database 
+    # and returns from database the text in json-format
+    if id_in_database(id):
+        pdf_item = session.query(Pdf).filter_by(id=id).first()
+        doc_text_in_dict = {'text': pdf_item.text}
+        return jsonify(doc_text_in_dict)
+    
+    # in other case it returns error message in json and 404 HTML error code (Not Found)
+    else: 
+        error_msg = {
+            "error_message":"the id you ask does not exist",
+            }
+        return jsonify(error_msg), 404
