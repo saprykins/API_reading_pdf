@@ -1,0 +1,16 @@
+cffi==1.15.0
+chardet==4.0.0
+click==8.0.3
+colorama==0.4.4
+cryptography==35.0.0
+Flask==2.0.2
+greenlet==1.1.2
+itsdangerous==2.0.1
+Jinja2==3.0.3
+MarkupSafe==2.0.1
+pdfminer==20191125
+pdfminer.six==20211012
+pycparser==2.21
+pycryptodome==3.11.0
+SQLAlchemy==1.4.27
+Werkzeug==2.0.2
