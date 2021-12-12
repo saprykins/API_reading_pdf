@@ -1,5 +1,14 @@
+# STEPS OF IMPROUVEMENT
+# Try to use pprint
+# delete "debug=True" in main function
+# need to add processing state (to be able to share status)
+# tbc number of blueprints
+# tbc if can keep app in __init__.py outside function
+
+
+
 from flask import Flask
-from views import index_blueprint, upload_file_blueprint, get_file_info_blueprint, get_text_blueprint
+from controller import index_blueprint, upload_file_blueprint, get_file_info_blueprint, get_text_blueprint
 
 # initialization of WSGI application
 app = Flask(__name__)
