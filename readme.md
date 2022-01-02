@@ -169,13 +169,21 @@ To stop the application, type "ctr + C" in terminal window where it was launched
 
 
 ## Test the application
-To launch tests, go to the root folder of the application (API_reading_pdf)  
+To launch tests, go to the project's top-level directory (API_reading_pdf)  
 and launch the command  
 ```
-$ pytest --cov=flaskr tests/
+$ export PYTHONPATH="venv/lib/python3.9/site-packages/"
+$ coverage run -m pytest
+$ coverage report
 ```
-The result will show 
-
+For more details, you can check what are the line numbers that were not covered in tests
+```
+$ coverage report -m
+```
+To create a detailed html report in "API_reading_pdf/htmlcov/index.html", type the following
+```
+$ coverage html
+```
 
 
 
