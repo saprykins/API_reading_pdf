@@ -8,16 +8,21 @@
 
 
 from flask import Flask
-from controller import index_blueprint, upload_file_blueprint, get_file_info_blueprint, get_text_blueprint
+from flaskr.controller import index_blueprint, upload_file_blueprint, get_file_info_blueprint, get_text_blueprint
+
+def init_app():
+    app = Flask(__name__)
+
+    app.register_blueprint(index_blueprint)
+    app.register_blueprint(upload_file_blueprint)
+    app.register_blueprint(get_file_info_blueprint)
+    app.register_blueprint(get_text_blueprint)
+
+    return app
 
 # initialization of WSGI application
-app = Flask(__name__)
-
-app.register_blueprint(index_blueprint)
-app.register_blueprint(upload_file_blueprint)
-app.register_blueprint(get_file_info_blueprint)
-app.register_blueprint(get_text_blueprint)
+app = init_app()
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    # app.run()
+    # app.run(debug=True)
+    app.run()

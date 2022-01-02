@@ -163,9 +163,21 @@ Type in address line http://localhost:5000/text/document_id.txt
 
   http://localhost:5000/text/1.txt  
 
-## STOP THE APPLICATION
+## Stop the application
 
 To stop the application, type "ctr + C" in terminal window where it was launched or close the terminal window.  
+
+
+## Test the application
+To launch tests, go to the root folder of the application (API_reading_pdf)  
+and launch the command  
+```
+$ pytest --cov=flaskr tests/
+```
+The result will show 
+
+
+
 
 <!---
 step-by-step instructions for using APIs to accomplish specific tasks or workflows with detailed explanations about using the endpoints and parameters in each function call or method invocation.

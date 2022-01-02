@@ -6,11 +6,11 @@ from flask import Blueprint
 from flask import request
 from werkzeug.utils import secure_filename
 
-from model import generate_file_id, save_metadata_and_text_to_data_base, save_received_pdf
-from model import Pdf
-from model import session
-from model import init_db
-from model import id_in_database
+from flaskr.model import generate_file_id, save_metadata_and_text_to_data_base, save_received_pdf, Pdf, session, init_db, id_in_database
+# from model import Pdf
+# from model import session
+# from model import init_db
+# from model import id_in_database
 
 
 # blueprints used to split code into several files 
