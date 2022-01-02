@@ -185,7 +185,16 @@ To create a detailed html report in "API_reading_pdf/htmlcov/index.html", type t
 $ coverage html
 ```
 
-
+## Check code quality with Pylint
+To check if the style of code in files is pythonic you can use Pylint.  
+To do that go to flaskr directory and type
+```
+$ pylint ./flaskr
+```
+You can also check each file using  
+```
+$ pylint model.py
+```
 
 <!---
 step-by-step instructions for using APIs to accomplish specific tasks or workflows with detailed explanations about using the endpoints and parameters in each function call or method invocation.

@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+"Initialization of Flask application"
+
 # STEPS OF IMPROUVEMENT
 # Try to use pprint
 # delete "debug=True" in main function
@@ -5,12 +9,14 @@
 # tbc number of blueprints
 # tbc if can keep app in __init__.py outside function
 
-
-
 from flask import Flask
-from flaskr.controller import index_blueprint, upload_file_blueprint, get_file_info_blueprint, get_text_blueprint
+from flaskr.controller import index_blueprint, upload_file_blueprint
+from flaskr.controller import get_file_info_blueprint, get_text_blueprint
 
 def init_app():
+    """
+    Flask factory
+    """
     app = Flask(__name__)
 
     app.register_blueprint(index_blueprint)
@@ -19,12 +25,3 @@ def init_app():
     app.register_blueprint(get_text_blueprint)
 
     return app
-    
-"""
-# initialization of WSGI application
-app = init_app()
-
-if __name__ == '__main__':
-    # app.run(debug=True)
-    app.run()
-"""

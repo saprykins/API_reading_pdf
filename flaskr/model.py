@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+
+"Model module that assures work with database"
+
+# for verification if upload path exist
+import os
+
+# imports to generate file-id
+import random
+import string
+
 # imports to work with web
 from flask import request
 
@@ -8,9 +19,6 @@ from pdfminer.high_level import extract_text
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
 
-# imports to generate file-id 
-import random
-import string
 
 # imports to work with databse
 from sqlalchemy import Column, Integer, String
@@ -18,12 +26,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-# for verification if upload path exist
-import os
-
 
 # path to folder where files will be saved
-path_to_save_folder = '../uploads/'
+PATH_TO_SAVE_FOLDER = '../uploads/'
 
 
 # creation and preparation of database
@@ -36,13 +41,16 @@ session = Session()
 
 
 def init_db():
+    """
+    Database initialization
+    """
     Base.metadata.create_all(engine)
 
 
 class Pdf(Base):
     """
     Represents pdf-file
-    It is used to save metadata, text of pdf-file 
+    It is used to save metadata, text of pdf-file
     and to retrive this information
     """
 
@@ -65,28 +73,45 @@ class Pdf(Base):
     # name of pdf file that was saved locally
     file_id = Column(String)
 
+    '''
+    def __init__(self, author=None, creation_date=None, \
+        modification_date=None, creator=None, \
+            status=None, text=None, file_id=None):
+        """
+        Initializes database
+        """
+        self.author = author
+        self.creation_date = creation_date
+        self.modification_date = modification_date
+        self.creator = creator
+        self.status = status
+        self.text = text
+        self.file_id = file_id
+    '''
+
     def __repr__(self):
-        return "<Pdf(author='%s', creation_date='%s', modification_date='%s', creator='%s', status='%s', text='%s', file_id='%s')>" % (
-            self.author, self.creation_date, self.modification_date, self.creator, self.status, self.text, self.file_id)
+        return "<Pdf(author=f'{self.author}', creation_date=f'{self.creation_date}', \
+            modification_date=f'{self.modification_date}', creator=f'{self.creator}', \
+                status=f'{self.status}', text=f'{self.text}', file_id=f'{self.file_id}')>"
 
 
-def id_in_database(id): 
+def id_in_database(document_id):
     """
     verifies if id is in dabase and if it is digit
     """
-    
+
     # default verification result is False
     result = False
 
     # checks the highest id in database
     max_id_in_database = session.query(Pdf).count()
-    
+
     # creates an array of existing indexes in database
     list_of_id_in_database = list(range(1, max_id_in_database + 1))
-    
-    # checks if requested identifier is a number 
+
+    # checks if requested identifier is a number
     # and if the id is in database
-    if id.isdigit() and int(id) in list_of_id_in_database: 
+    if id.isdigit() and int(document_id) in list_of_id_in_database:
         result = True
     return result
 
@@ -96,24 +121,24 @@ def create_upload_folder_if_needed():
     Upload folder is where pdf files are saved
     If upload folder does not exist, it creates one
     """
-    if not os.path.exists(path_to_save_folder): 
-        os.makedirs(path_to_save_folder)
-     
+    if not os.path.exists(PATH_TO_SAVE_FOLDER):
+        os.makedirs(PATH_TO_SAVE_FOLDER)
 
-    
+
+
 def save_received_pdf(file_id):
     """
-    Saves uploaded pdf-file to local path 
+    Saves uploaded pdf-file to local path
     uses file_id as a part of file name
     """
     create_upload_folder_if_needed()
-    local_file_path = path_to_save_folder + file_id + '.pdf'
+    local_file_path = PATH_TO_SAVE_FOLDER + file_id + '.pdf'
     file = request.files['file']
     file.save(local_file_path)
 
 
 def generate_file_id():
-    """ 
+    """
     generates id that will be used to save file localy
     """
     file_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
@@ -141,11 +166,11 @@ def save_metadata_and_text_to_data_base(doc_id):
             file_id=doc_id)
     ])
     session.commit()
-    
+
     # gets the record from database using pdf-file name
     pdf_item = session.query(Pdf).filter_by(file_id=doc_id).first()
-    
-    # returns identifier of the record in database 
+
+    # returns identifier of the record in database
     return pdf_item.id
 
 
@@ -154,8 +179,8 @@ def extract_text_from_pdf(doc_id):
     extracts text from pdf-file
     """
     # gets previously saved pdf file locally
-    path_to_pdf = path_to_save_folder + doc_id + '.pdf'
-    
+    path_to_pdf = PATH_TO_SAVE_FOLDER + doc_id + '.pdf'
+
     # extracts text from the pdf
     text = extract_text(path_to_pdf)
     return text
@@ -167,8 +192,8 @@ def extract_metadata_from_pdf(doc_id):
     and returns dictionary with metadata inside
     """
     # gets previously saved pdf file locally
-    path_to_pdf = path_to_save_folder + doc_id + '.pdf'
-    
+    path_to_pdf = PATH_TO_SAVE_FOLDER + doc_id + '.pdf'
+
     # extracts metadata from the pdf
     with open(path_to_pdf, 'rb') as file:
         parser = PDFParser(file)
