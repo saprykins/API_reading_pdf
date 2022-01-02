@@ -19,10 +19,12 @@ def init_app():
     app.register_blueprint(get_text_blueprint)
 
     return app
-
+    
+"""
 # initialization of WSGI application
 app = init_app()
 
 if __name__ == '__main__':
     # app.run(debug=True)
     app.run()
+"""

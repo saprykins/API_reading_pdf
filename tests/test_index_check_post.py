@@ -1,5 +1,5 @@
 # from flaskr.controller import upload_file
-from flaskr.__init__ import init_app
+from wsgi import init_app
 
 def test_index_check_post():
     """

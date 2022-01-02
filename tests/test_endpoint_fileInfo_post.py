@@ -1,7 +1,7 @@
 # i didn't put error 405, 
 # need to check if a sent file is wrong
 
-from flaskr.__init__ import init_app
+from wsgi import init_app
 
 def test_upload_check_get():
     """
