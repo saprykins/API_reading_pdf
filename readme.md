@@ -5,6 +5,11 @@ API that receives and saves pdf file, extracts and saves its text and meta-data 
 API allows to retrieve text and meta-data of a pdf-file previously uploaded via its id.  
 No authentication required
 
+# USAGE
+POST	/documents				upload a new pdf, responds a document ID
+GET		/documents/<id> 		describe document processing state (pending, success, failure), metadata and links to contents 
+GET		/text/<id>.txt 		a way to read the extracted text
+
 # INSTALLATION (UBUNTU OS)
 
 The application requires Python installed.  
@@ -100,7 +105,7 @@ $  curl -sF file=@"sample.pdf" http://localhost:5000/documents
 
 To retrive metadata about a file, you need its id (or document_id) that you get on previous step.  
 ```
-curl -s http://localhost:5000/documents/document_id
+curl -s http://localhost:5000/documents/<document_id>
 ```
 * where document_id should be replaced by a number.  
 
@@ -124,7 +129,7 @@ The standard response returns json-file in format:
 
 Instead of curl, you can also retrieve metadata via web-browser  
 
-Type in address line http://localhost:5000/documents/document_id 
+Type in address line http://localhost:5000/documents/<document_id> 
 
 * where document_id should be replaced by a number.  
 
@@ -136,7 +141,7 @@ Type in address line http://localhost:5000/documents/document_id
 
 To retrive text from database, you need document_id. Type the following in command line to retrieve it:  
 ```
-$ curl -s http://localhost:5000/text/document_id.txt
+$ curl -s http://localhost:5000/text/<document_id>.txt
 ```
 * where document_id should be replaced by a number.  
 
@@ -155,7 +160,7 @@ Standard response returns json-file in format:
 
 Instead of curl, you can also retrieve text via web-browser  
 
-Type in address line http://localhost:5000/text/document_id.txt 
+Type in address line http://localhost:5000/text/<document_id>.txt 
 
 * where document_id should be replaced by a number.  
 
@@ -219,3 +224,14 @@ it creates a folder if it doesn't exist
 if not ubuntu
 do i need python
 -->
+
+test-project/
+├── data        
+├── deliver           # Final analysis, code, & presentations
+├── develop           # Notebooks for exploratory analysis
+├── src               # Scripts & local project modules
+├── venv              # Scripts & local project modules
+└── tests
+
+The application allows user to upload pdf-file, to extract text and metadata from it and displays it to user. 
+It is based on three endpoints

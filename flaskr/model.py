@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-"Model module that assures work with database"
+"""
+Model module that assures work with database
+"""
 
 # for verification if upload path exist
 import os
@@ -18,7 +20,6 @@ from pdfminer.high_level import extract_text
 # imports to extract data from pdf
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
-
 
 # imports to work with databse
 from sqlalchemy import Column, Integer, String
@@ -70,10 +71,13 @@ class Pdf(Base):
     status = Column(String)
     # text inside pdf-file
     text = Column(String)
-    # name of pdf file that was saved locally
+    # id of pdf file that was saved locally
+    # for example if file_id = baaatgwcatfnckpi, the file is saved as 'baaatgwcatfnckpi.pdf'
     file_id = Column(String)
 
     '''
+    # story: pylint sais there's pb, i tried this, but not usefull
+
     def __init__(self, author=None, creation_date=None, \
         modification_date=None, creator=None, \
             status=None, text=None, file_id=None):
@@ -90,6 +94,9 @@ class Pdf(Base):
     '''
 
     def __repr__(self):
+        """
+        Allows to print an object
+        """
         return "<Pdf(author=f'{self.author}', creation_date=f'{self.creation_date}', \
             modification_date=f'{self.modification_date}', creator=f'{self.creator}', \
                 status=f'{self.status}', text=f'{self.text}', file_id=f'{self.file_id}')>"
@@ -97,7 +104,8 @@ class Pdf(Base):
 
 def id_in_database(document_id):
     """
-    verifies if id is in dabase and if it is digit
+    verifies if document_id is in dabase 
+    and whether document_id is a digit
     """
 
     # default verification result is False
@@ -110,8 +118,8 @@ def id_in_database(document_id):
     list_of_id_in_database = list(range(1, max_id_in_database + 1))
 
     # checks if requested identifier is a number
-    # and if the id is in database
-    if id.isdigit() and int(document_id) in list_of_id_in_database:
+    # and whether the id is in database
+    if document_id.isdigit() and int(document_id) in list_of_id_in_database:
         result = True
     return result
 
@@ -119,17 +127,16 @@ def id_in_database(document_id):
 def create_upload_folder_if_needed():
     """
     Upload folder is where pdf files are saved
-    If upload folder does not exist, it creates one
+    If upload folder does not exist, it creates it
     """
     if not os.path.exists(PATH_TO_SAVE_FOLDER):
         os.makedirs(PATH_TO_SAVE_FOLDER)
 
 
-
 def save_received_pdf(file_id):
     """
     Saves uploaded pdf-file to local path
-    uses file_id as a part of file name
+    It uses file_id as a part of file name
     """
     create_upload_folder_if_needed()
     local_file_path = PATH_TO_SAVE_FOLDER + file_id + '.pdf'
@@ -139,9 +146,12 @@ def save_received_pdf(file_id):
 
 def generate_file_id():
     """
-    generates id that will be used to save file localy
+    Generates id that will be used to save file in local filesystem
+    The id consists of 16 ascii characters
     """
-    file_id = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
+    file_id_length = 16
+    file_id = ''.join(random.choice(string.ascii_lowercase)
+                      for i in range(file_id_length))
     return str(file_id)
 
 
