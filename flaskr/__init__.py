@@ -11,13 +11,20 @@ from flaskr.controller import index_blueprint, upload_file_blueprint
 from flaskr.controller import get_file_info_blueprint, get_text_blueprint
 
 
-def init_app():
+def init_app(test_config=None):
     """
     Initialize the /core/ application
     """
-
+   
     # Create a Flask app object
     app = Flask(__name__)
+
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_pyfile("config.py", silent=True)
+    else:
+        # load the test config if passed in
+        app.config.update(test_config)
 
     # Register Blueprints
     app.register_blueprint(index_blueprint)

@@ -58,13 +58,14 @@ def upload_file():
         # put doc_id in Python dictionary
         doc_id_dictionary = {"id": record_id}
         return jsonify(doc_id_dictionary)
-
-    # in case the file is not pdf
-    # it returns error in json and 415 HTTP error code (Unsupported Media Type)
-    error_msg = {
-        "error_message": "only .pdf or .PDF-file types are allowed",
-    }
-    return jsonify(error_msg), 415
+        
+    else:
+        # in case the file is not pdf
+        # it returns error in json and 415 HTTP error code (Unsupported Media Type)
+        error_msg = {
+            "error_message": "only .pdf or .PDF-file types are allowed",
+        }
+        return jsonify(error_msg), 415
 
 
 # Bind function with decorator
@@ -74,7 +75,7 @@ def processing_meta_link(document_id):
     Routing to the endpoint that returns document's metadata in json
     id is identifier in database
     '''
-
+    
     # checks if it is the first usage of database
     if database_is_empty():
         error_msg = {

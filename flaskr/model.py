@@ -93,6 +93,8 @@ class Pdf(Base):
         self.file_id = file_id
     '''
 
+    '''
+    # requires tests
     def __repr__(self):
         """
         Allows to print Pdf-object
@@ -100,7 +102,7 @@ class Pdf(Base):
         return "<Pdf(author=f'{self.author}', creation_date=f'{self.creation_date}', \
             modification_date=f'{self.modification_date}', creator=f'{self.creator}', \
                 status=f'{self.status}', text=f'{self.text}', file_id=f'{self.file_id}')>"
-
+    '''
 
 def database_is_empty():
     """
