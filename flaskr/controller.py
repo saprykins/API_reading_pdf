@@ -9,7 +9,7 @@ from flask import Blueprint
 from flask import request
 from werkzeug.utils import secure_filename
 from flaskr.model import generate_file_id, save_metadata_and_text_to_data_base
-from flaskr.model import save_received_pdf, Pdf, session, init_db, id_in_database
+from flaskr.model import save_received_pdf, Pdf, session, init_db, id_in_database, database_is_empty
 
 
 # Create blueprint objects
@@ -60,7 +60,7 @@ def upload_file():
         return jsonify(doc_id_dictionary)
 
     # in case the file is not pdf
-    # it returns error in json and 415 HTML error code (Unsupported Media Type)
+    # it returns error in json and 415 HTTP error code (Unsupported Media Type)
     error_msg = {
         "error_message": "only .pdf or .PDF-file types are allowed",
     }
@@ -74,6 +74,13 @@ def processing_meta_link(document_id):
     Routing to the endpoint that returns document's metadata in json
     id is identifier in database
     '''
+
+    # checks if it is the first usage of database
+    if database_is_empty():
+        error_msg = {
+            "error_message": "database is empty",
+        }
+        return jsonify(error_msg), 404
 
     # In case the requested <document_id> is in database
     if id_in_database(document_id):
@@ -94,7 +101,7 @@ def processing_meta_link(document_id):
         return jsonify(meta_data_dictionary)
 
     # In case the requested <document_id> is NOT in database,
-    # it returns error message in json and 404 HTML error code (Not Found)
+    # it returns error message in json and 404 HTTP error code (Not Found)
     error_msg = {
         "error_message": "the id you ask does not exist",
     }
@@ -107,6 +114,14 @@ def print_text(document_id):
     """
     Routing to the endpoint that returns related text from database
     """
+
+    # checks if it is the first usage of database
+    if database_is_empty():
+        error_msg = {
+            "error_message": "database is empty",
+        }
+        return jsonify(error_msg), 404
+
     # checks if requested document_id in database
     # and returns from database the text in json-format
     if id_in_database(document_id):
@@ -115,7 +130,7 @@ def print_text(document_id):
         return jsonify(doc_text_in_dict)
 
     # In case the requested <document_id> is NOT in database,
-    # it returns error message in json and 404 HTML error code (Not Found)
+    # it returns error message in json and 404 HTTP error code (Not Found)
     error_msg = {
         "error_message": "the id you ask does not exist",
     }

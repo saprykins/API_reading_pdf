@@ -29,7 +29,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 
 # path to folder where files will be saved
-PATH_TO_SAVE_FOLDER = '../uploads/'
+PATH_TO_SAVE_FOLDER = './uploads/'
 
 
 # creation and preparation of database
@@ -95,11 +95,27 @@ class Pdf(Base):
 
     def __repr__(self):
         """
-        Allows to print an object
+        Allows to print Pdf-object
         """
         return "<Pdf(author=f'{self.author}', creation_date=f'{self.creation_date}', \
             modification_date=f'{self.modification_date}', creator=f'{self.creator}', \
                 status=f'{self.status}', text=f'{self.text}', file_id=f'{self.file_id}')>"
+
+
+def database_is_empty():
+    """
+    verifies if database is empty
+    """
+
+    # default verification result is False
+    result = False
+
+    # check if database is empty
+    filesize = os.path.getsize('./pdf.db')
+    if filesize == 0:
+        return True
+
+    return result
 
 
 def id_in_database(document_id):
@@ -201,6 +217,7 @@ def extract_metadata_from_pdf(doc_id):
     extracts metadata from pdf-file
     and returns dictionary with metadata inside
     """
+
     # gets previously saved pdf file locally
     path_to_pdf = PATH_TO_SAVE_FOLDER + doc_id + '.pdf'
 
