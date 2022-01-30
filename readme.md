@@ -43,7 +43,7 @@ API_reading_pdf/
 
 Commits history can be checked by the following command
 ```
-  $ gitk
+gitk
 ```
 
 
@@ -61,31 +61,31 @@ Create a new folder for the application
 
 Unzip the downloaded zip file in the folder you have just created  
 
-Create vitual environment  
+In folder "API_reading_pdf" create vitual environment  
 
 * You can create it from command line:  
   ```
-  $ sudo virtualenv <my_env_name>
+  virtualenv <my_env_name>
   ```
   where <my_env_name> is the name of the virtual environment you would like to create.  
 
   As an example, to create a virtual environment 'venv' you should type: 
   ```
-  $ sudo virtualenv venv
+  virtualenv venv
   ```
 * If you do not have virtual environment tool installed, you can install it from command line:    
   ```
-  $ sudo apt install python3-virtualenv
+  sudo apt install python3-virtualenv
   ```
 
 Activate the virtual environment you have just created: 
 In Ubuntu:
 ```
-$ source <my_env_name>/bin/activate
+source <my_env_name>/bin/activate
 ```
 * In case you created virtual environment "venv" you activate it as follows:  
   ```
-  $ source ./venv/bin/activate
+  source ./venv/bin/activate
   ```
 
 * For more details about virtual environment, check the following link:  
@@ -93,7 +93,7 @@ $ source <my_env_name>/bin/activate
 
 Install the packages that application requires by typing in command line:  
 ```
-$ pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 
@@ -101,9 +101,9 @@ $ pip install -r requirements.txt
 
 ## Run the application  
 
-To run the application after installation, type the following in command line:  
+To run the application after installation, stay in folder "flask_reading_pdf" and type the following in command line:  
 ```
-$ python flask_reading_pdf/wsgi.py
+python wsgi.py
 ```
 The application runs while the command line window is open.  
 
@@ -121,7 +121,7 @@ To upload a pdf-file "sample.pdf" using command line, you can use curl-command
 
 * In case curl tool is not installed you can do this in command line:  
   ```
-  $ sudo apt  install curl   
+  sudo apt install curl   
   ```
 
 In terminal, go to the folder where the file you want to send is located.  
@@ -130,7 +130,7 @@ You can find a sample.pdf file in "flask_reading_pdf" folder.
 
 To send sample.pdf file to application, type:  
 ```
-$  curl -sF file=@"sample.pdf" http://localhost:5000/documents
+curl -sF file=@"sample.pdf" http://localhost:5000/documents
 ```
 * Standard response returns a json file in the following format:  
   ```
@@ -140,9 +140,9 @@ $  curl -sF file=@"sample.pdf" http://localhost:5000/documents
   ```
   where 1 is id number of the record in database.  
 
-* At this moment the pdf-file is saved on your local machine, text and metadata are saved in local sqlite database.  
+* At this moment the pdf-file is saved in 'API_reading_pdf-develop/uploads' on your local machine, text and metadata are saved in local sqlite database.  
 
-* You can use this id to retrieve the information about the file.  
+* You should use this id to retrieve the information about the file.  
 
 
 ## Get metadata  
@@ -173,7 +173,7 @@ The standard response returns json-file in format:
 
 Instead of curl, you can also retrieve metadata via web-browser  
 
-Type in address line http://localhost:5000/documents/<document_id> 
+Type in address line http://localhost:5000/documents/<document_id>  
 
 * where document_id should be replaced by a number.  
 
@@ -186,13 +186,13 @@ Type in address line http://localhost:5000/documents/<document_id>
 
 To retrive text from database, you need its document_id. Type the following in command line to retrieve it:  
 ```
-$ curl -s http://localhost:5000/text/<document_id>.txt
+curl -s http://localhost:5000/text/<document_id>.txt
 ```
 * where document_id should be replaced by a number.  
 
 * In case you sent at least one file, you can retrieve metadata related to the record 1 in database by typing:  
   ```
-  $ curl -s http://localhost:5000/text/1.txt
+  curl -s http://localhost:5000/text/1.txt
   ```
 * Keep in mind ".txt" after <document_id>
 
@@ -225,17 +225,21 @@ To launch tests, go to the project's top-level directory "API_reading_pdf"
 and launch the following commands
 Tests cover 97-98% of code    
 ```
-$ export PYTHONPATH="venv/lib/python3.9/site-packages/"
-$ coverage run -m pytest
-$ coverage report
+export PYTHONPATH="venv/lib/python3.9/site-packages/"
+```
+```
+coverage run -m pytest
+```
+```
+coverage report
 ```
 For more details, you can check what are the line numbers that were not covered in tests
 ```
-$ coverage report -m
+coverage report -m
 ```
 To create a detailed html report in "API_reading_pdf/htmlcov/index.html", type the following
 ```
-$ coverage html
+coverage html
 ```
 
 ## Check code quality with Pylint
@@ -243,9 +247,9 @@ $ coverage html
 To check if the style of code in files is pythonic you can use Pylint.  
 To do that stay in top-level directory "API_reading_pdf" and type
 ```
-$ pylint ./flaskr
+pylint ./flaskr
 ```
 You can also check each file using  
 ```
-$ pylint model.py
+pylint model.py
 ```
