@@ -57,10 +57,6 @@ The application requires Python installed.
 Download the latest version of applicaton from the link below:  
 https://github.com/saprykins/API_reading_pdf/archive/refs/heads/master.zip  
 
-Create a new folder for the application  
-
-Unzip the downloaded zip file in the folder you have just created  
-
 In folder "API_reading_pdf" create vitual environment  
 
 * You can create it from command line:  
