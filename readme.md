@@ -39,13 +39,6 @@ API_reading_pdf/
 └── wsgi.py          (application entry point)  
 ```
 
-## Versioning
-
-Commits history can be checked by the following command
-```
-gitk
-```
-
 
 # INSTALLATION (UBUNTU OS)
 
@@ -65,7 +58,7 @@ In folder "API_reading_pdf" create vitual environment
   ```
   where <my_env_name> is the name of the virtual environment you would like to create.  
 
-  As an example, to create a virtual environment 'venv' you should type: 
+  As an example, to create a virtual environment 'venv' you should type in terminal: 
   ```
   virtualenv venv
   ```
@@ -74,7 +67,7 @@ In folder "API_reading_pdf" create vitual environment
   sudo apt install python3-virtualenv
   ```
 
-Activate the virtual environment you have just created: 
+Activate the virtual environment you have just created:  
 In Ubuntu:
 ```
 source <my_env_name>/bin/activate
@@ -128,7 +121,7 @@ To send sample.pdf file to application, type:
 ```
 curl -sF file=@"sample.pdf" http://localhost:5000/documents
 ```
-* Standard response returns a json file in the following format:  
+* Standard response returns in the following format:  
   ```
   {
       "id": 1
@@ -154,7 +147,7 @@ curl -s http://localhost:5000/documents/<document_id>
   curl -s http://localhost:5000/documents/1
   ```
   
-The standard response returns json-file in format:
+The standard response is in the following format:
 ```
 {
   "author": "GPL Ghostscript SVN PRE-RELEASE 8.62",
@@ -192,7 +185,7 @@ curl -s http://localhost:5000/text/<document_id>.txt
   ```
 * Keep in mind ".txt" after <document_id>
 
-Standard response returns json-file in format:  
+Standard response returns in the following format:  
 ```
 {
     "text": "text from pdf"
