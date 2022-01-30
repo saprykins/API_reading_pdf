@@ -16,25 +16,24 @@ from flask import request
 
 # imports to read from pdf
 from pdfminer.high_level import extract_text
+from pdfminer.pdfdocument import PDFDocument
 
 # imports to extract data from pdf
 from pdfminer.pdfparser import PDFParser
-from pdfminer.pdfdocument import PDFDocument
 
 # imports to work with databse
-from sqlalchemy import Column, Integer, String
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-
+from sqlalchemy.orm import sessionmaker
 
 # path to folder where files will be saved
-PATH_TO_SAVE_FOLDER = './uploads/'
+PATH_TO_SAVE_FOLDER = "./uploads/"
 
 
 # creation and preparation of database
-engine = create_engine('sqlite:///pdf.db', echo=False,
-                       connect_args={'check_same_thread': False})
+engine = create_engine(
+    "sqlite:///pdf.db", echo=False, connect_args={"check_same_thread": False}
+)
 connection = engine.connect()
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
@@ -56,7 +55,7 @@ class Pdf(Base):
     """
 
     # Table name in the database
-    __tablename__ = 'pdfs'
+    __tablename__ = "pdfs"
     # identifier in database
     id = Column(Integer, primary_key=True)
     # author of pdf-file
@@ -75,45 +74,17 @@ class Pdf(Base):
     # for example if file_id = baaatgwcatfnckpi, the file is saved as 'baaatgwcatfnckpi.pdf'
     file_id = Column(String)
 
-    '''
-    # story: pylint sais there's pb, i tried this, but not usefull
-
-    def __init__(self, author=None, creation_date=None, \
-        modification_date=None, creator=None, \
-            status=None, text=None, file_id=None):
-        """
-        Initializes database
-        """
-        self.author = author
-        self.creation_date = creation_date
-        self.modification_date = modification_date
-        self.creator = creator
-        self.status = status
-        self.text = text
-        self.file_id = file_id
-    '''
-
-    '''
-    # requires tests
-    def __repr__(self):
-        """
-        Allows to print Pdf-object
-        """
-        return "<Pdf(author=f'{self.author}', creation_date=f'{self.creation_date}', \
-            modification_date=f'{self.modification_date}', creator=f'{self.creator}', \
-                status=f'{self.status}', text=f'{self.text}', file_id=f'{self.file_id}')>"
-    '''
 
 def database_is_empty():
     """
-    verifies if database is empty
+    Verifies whether the database is empty
     """
 
     # default verification result is False
     result = False
 
     # check if database is empty
-    filesize = os.path.getsize('./pdf.db')
+    filesize = os.path.getsize("./pdf.db")
     if filesize == 0:
         return True
 
@@ -122,7 +93,7 @@ def database_is_empty():
 
 def id_in_database(document_id):
     """
-    verifies if document_id is in dabase 
+    Verifies if a document_id is in dabase
     and whether document_id is a digit
     """
 
@@ -144,8 +115,8 @@ def id_in_database(document_id):
 
 def create_upload_folder_if_needed():
     """
-    Upload folder is where pdf files are saved
-    If upload folder does not exist, it creates it
+    Checks if the folder where pdf files are saved exists
+    If upload folder does not exist, the function creates it
     """
     if not os.path.exists(PATH_TO_SAVE_FOLDER):
         os.makedirs(PATH_TO_SAVE_FOLDER)
@@ -157,8 +128,8 @@ def save_received_pdf(file_id):
     It uses file_id as a part of file name
     """
     create_upload_folder_if_needed()
-    local_file_path = PATH_TO_SAVE_FOLDER + file_id + '.pdf'
-    file = request.files['file']
+    local_file_path = PATH_TO_SAVE_FOLDER + file_id + ".pdf"
+    file = request.files["file"]
     file.save(local_file_path)
 
 
@@ -168,14 +139,15 @@ def generate_file_id():
     The id consists of 16 ascii characters
     """
     file_id_length = 16
-    file_id = ''.join(random.choice(string.ascii_lowercase)
-                      for i in range(file_id_length))
+    file_id = "".join(
+        random.choice(string.ascii_lowercase) for i in range(file_id_length)
+    )
     return str(file_id)
 
 
 def save_metadata_and_text_to_data_base(doc_id):
     """
-    saves meta-data and text from pdf to database
+    Saves meta-data and text from pdf to database
     """
 
     # extracts text and metadata from pdf
@@ -183,16 +155,20 @@ def save_metadata_and_text_to_data_base(doc_id):
     meta_data = extract_metadata_from_pdf(doc_id)
 
     # saves information in database
-    session.add_all([
-        Pdf(author=meta_data['author'],
-            creation_date=meta_data['creation_date'],
-            modification_date=meta_data['modification_date'],
-            creator=meta_data['creator'],
-            # status is success since the file is saved locally
-            status='success',
-            text=doc_text,
-            file_id=doc_id)
-    ])
+    session.add_all(
+        [
+            Pdf(
+                author=meta_data["author"],
+                creation_date=meta_data["creation_date"],
+                modification_date=meta_data["modification_date"],
+                creator=meta_data["creator"],
+                # status is success since the file is saved locally
+                status="success",
+                text=doc_text,
+                file_id=doc_id,
+            )
+        ]
+    )
     session.commit()
 
     # gets the record from database using pdf-file name
@@ -204,10 +180,10 @@ def save_metadata_and_text_to_data_base(doc_id):
 
 def extract_text_from_pdf(doc_id):
     """
-    extracts text from pdf-file
+    Extracts text from pdf-file
     """
     # gets previously saved pdf file locally
-    path_to_pdf = PATH_TO_SAVE_FOLDER + doc_id + '.pdf'
+    path_to_pdf = PATH_TO_SAVE_FOLDER + doc_id + ".pdf"
 
     # extracts text from the pdf
     text = extract_text(path_to_pdf)
@@ -216,15 +192,15 @@ def extract_text_from_pdf(doc_id):
 
 def extract_metadata_from_pdf(doc_id):
     """
-    extracts metadata from pdf-file
+    Extracts metadata from pdf-file
     and returns dictionary with metadata inside
     """
 
     # gets previously saved pdf file locally
-    path_to_pdf = PATH_TO_SAVE_FOLDER + doc_id + '.pdf'
+    path_to_pdf = PATH_TO_SAVE_FOLDER + doc_id + ".pdf"
 
     # extracts metadata from the pdf
-    with open(path_to_pdf, 'rb') as file:
+    with open(path_to_pdf, "rb") as file:
         parser = PDFParser(file)
         doc = PDFDocument(parser)
 
@@ -232,12 +208,10 @@ def extract_metadata_from_pdf(doc_id):
         meta_data = {}
 
         for item in doc.info:
-            meta_data['author'] = item['Producer'].decode("utf-8", 'ignore')
-            meta_data['creation_date'] = item['CreationDate'].decode(
-                "utf-8", 'ignore')
-            meta_data['modification_date'] = item['ModDate'].decode(
-                "utf-8", 'ignore')
-            meta_data['creator'] = item['Creator'].decode("utf-8", 'ignore')
+            meta_data["author"] = item["Producer"].decode("utf-8", "ignore")
+            meta_data["creation_date"] = item["CreationDate"].decode("utf-8", "ignore")
+            meta_data["modification_date"] = item["ModDate"].decode("utf-8", "ignore")
+            meta_data["creator"] = item["Creator"].decode("utf-8", "ignore")
             # meta_data['title'] = item['Title'].decode("utf-8", 'ignore')
 
     return meta_data
