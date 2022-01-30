@@ -1,6 +1,14 @@
-from wsgi import init_app
+#!/usr/bin/env python
 
-def test_index_check_post():
+'''
+Tests of index page
+'''
+
+from wsgi import init_app
+from test_app import client
+
+'''
+def test_index_post_get():
     """
     GIVEN a Flask application
     a)
@@ -10,7 +18,7 @@ def test_index_check_post():
     WHEN the '/' page is requested(GET)
     THEN check that the HTTP response is 200
     """
-    
+
     flask_app = init_app()
     # part a)
     with flask_app.test_client() as test_client:
@@ -21,13 +29,29 @@ def test_index_check_post():
     with flask_app.test_client() as test_client:
         response = test_client.get('/')
         assert response.status_code == 200
+'''
 
+def test_index_page(client):
+    """
+    GIVEN a Flask application
+    a)
+    WHEN the '/' page is requested(GET)
+    THEN check that the HTTP response is 200
+    b)
+    THEN check that the text contains 'Index page'
+    c)
+    WHEN the '/' page is requested(POST)
+    THEN check that the HTTP response is 405
+    """
 
-def test_empty_db(client):
-    """
-    Check that index page text has 'Index page' text in it
-    """
     # send HTTP get request to index page
-    rv = client.get('/')
-    assert b'Index page' in rv.data
-    
+    response = client.get('/')
+    # part a)
+    assert response.status_code == 200
+
+    # part b)
+    assert b'Index page' in response.data
+
+    # part c)
+    response = client.post('/')
+    assert response.status_code == 405

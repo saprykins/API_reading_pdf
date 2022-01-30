@@ -1,44 +1,36 @@
-import os
-import tempfile
+#!/usr/bin/env python
+
+'''
+Tests empty database
+'''
+
 import io
+import os
+from wsgi import init_app
+from test_app import client
+from flaskr.model import database_is_empty
 # from flask import url_for
-import pytest
 
-from flaskr.__init__ import init_app
-from flaskr.model import init_db
-
-
-# configuration of application for testing
-@pytest.fixture
-def client():
-    # create data file and name
-    db_fd, db_path = tempfile.mkstemp()
+'''
+def test_vide_bd(client):
+    filesize = os.path.getsize('db_path')
+    if filesize == 0:
+        rv = client.get("/documents/1")
+        assert rv.status_code == 404
     
-    # activate 'tesing' flag
-    app = init_app({'TESTING': True, 'DATABASE': db_path})
+        rv_2 = client.get('/text/1.txt')
+        assert rv_2.status_code == 404
 
-    # initialization of a new database
-    with app.test_client() as client:
-        with app.app_context():
-            init_db()
-        yield client
+    else: 
+        rv = client.get("/documents/1")
+        assert rv.status_code == 200
     
-    # close the database file
-    os.close(db_fd)
-    os.unlink(db_path)
+        rv_2 = client.get('/text/1.txt')
+        assert rv_2.status_code == 200
 
 
 def test_empty_db(client):
-    """
-    Check that index page text has 'Index page' text in it
-    """
-    # send HTTP get request to index page
-    rv = client.get('/')
-    assert b'Index page' in rv.data
 
-    """
-    Check that index page text has 'Index page' text in it
-    """    
     # os.remove('db_path')
 
     flask_app = init_app()
@@ -49,39 +41,56 @@ def test_empty_db(client):
     with flask_app.test_client() as test_client:
         response = test_client.get('/text/1.txt')
         assert response.status_code == 404
-    
+'''
 
-def test_upload_check_get_NOK():
+
+def test_endpoint_documents_errors():
     """
     GIVEN a Flask application
+    a)
+    WHEN the '/documents/<id>' page is requested(GET)
+    THEN check that the HTTP response is 404
+    b)
     WHEN the '/documents/<id>' page is requested(POST)
     THEN check that the HTTP response is 405
     """
+    
     flask_app = init_app()
     
     with flask_app.test_client() as test_client:
+        # part a)
         response = test_client.get("/documents/100")
         assert response.status_code == 404
         
+        # part b)
         response = test_client.post("/documents/1")
         assert response.status_code == 405
 
         
-def test_send_document(client):
+def test_endpoint_documents_pdf_document(client):
     """
-    Test that sending a document is possible
+    GIVEN a Flask application and pdf-file
+    WHEN the '/documents' page is requested(POST)
+    THEN check that the HTTP response is 200
     """
-
     data = dict()
     data['file'] = open('./sample.pdf', 'rb')
     response = client.post('/documents', data=data, follow_redirects=True)
     assert response.status_code == 200
-    
+
+
+def test_endpoint_documents_non_pdf_document(client):
+    """
+    GIVEN a Flask application and NON pdf-file
+    WHEN the '/documents' page is requested(POST)
+    THEN check that the HTTP response is 415
+    """
+    data = dict()
     data['file'] = open('./requirements.txt', 'rb')
     response = client.post('/documents', data=data, follow_redirects=True)
     assert response.status_code == 415
 
-
+'''
 def test_upload_check_get():
     """
     GIVEN a Flask application
@@ -93,13 +102,14 @@ def test_upload_check_get():
         data = {}
         response = test_client.post("/documents", data=data, content_type="multipart/form-data")
         assert response.status_code == 400
+'''
 
 
-def test_upload_check_get_OK():
+def test_get_existing_documents():
     """
     GIVEN a Flask application
-    WHEN the '/documents/<id>' page is requested(POST)
-    THEN check that the HTTP response is 405
+    WHEN the '/documents/<id>' page is requested(GET)
+    THEN check that the HTTP response is 200
     """
     flask_app = init_app()
     with flask_app.test_client() as test_client:
@@ -108,10 +118,19 @@ def test_upload_check_get_OK():
 
 
 def test_get_text(client):
+    """
+    GIVEN a Flask application
+    a)
+    WHEN the '/text/<id>' existing page is requested(GET)
+    THEN check that the HTTP response is 200
+    b)
+    WHEN the '/text/<id>' NON existing page is requested(GET)
+    THEN check that the HTTP response is 404
+    """
     # Check existing record from database
     response = client.get('/text/1.txt')
     assert response.status_code == 200
-
+    
     # Check NON existing record from database
     response = client.get('/text/100.txt')
     assert response.status_code == 404
