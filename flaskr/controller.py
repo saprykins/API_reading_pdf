@@ -44,17 +44,35 @@ def upload_file():
     """
 
     # Save the file received in curl in 'file' variable
-    file = request.files["file"]
+    files = request.files.getlist("file")
 
     # Verification of file type from its name block
     # Save the filename from file
-    filename = secure_filename(file.filename)
+    # filename = secure_filename(files[0].filename)
 
     # Extract file extention
-    file_extention = filename[-3::].lower()
 
     # It Checks if the file is pdf-type
     # If it is pdf, it saves the file and returns its identifier from database in json-format
+
+    # there's an issue: still can't receive several files
+    init_db()
+    for file in files:
+        filename = secure_filename(file.filename)
+        file_extention = filename[-3::].lower()
+        if file_extention == "pdf":
+            file_id = generate_file_id()
+            save_received_pdf(file_id)
+            # init_db()
+            record_id = save_metadata_and_text_to_data_base(file_id)
+
+            # put doc_id in Python dictionary
+            doc_id_dictionary = {"id": record_id}
+            # ui = doc_id_dictionary
+            # print(ui)
+        return jsonify(doc_id_dictionary)
+    """
+    
     if file_extention == "pdf":
         file_id = generate_file_id()
         save_received_pdf(file_id)
@@ -64,7 +82,7 @@ def upload_file():
         # put doc_id in Python dictionary
         doc_id_dictionary = {"id": record_id}
         return jsonify(doc_id_dictionary)
-
+    """
     # In case the file is not pdf
     # it returns error in json and 415 HTTP error code (Unsupported Media Type)
     error_msg = {
